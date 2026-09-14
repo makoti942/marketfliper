@@ -1,5 +1,5 @@
 {
     "buildCommand": "npm run build",
     "outputDirectory": "dist",
-    "installCommand": "npx npm@10 install"
+    "installCommand": "npm install --force"
 }
