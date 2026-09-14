@@ -1,145 +1,236 @@
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
+import Button from '@/components/shared_ui/button';
+import Text from '@/components/shared_ui/text';
+import { DBOT_TABS } from '@/constants/bot-contents';
 import { useStore } from '@/hooks/useStore';
-import { api_base } from '@/external/bot-skeleton';
-import { fetchXmlWithCache, prefetchAllXmlInBackground } from '@/utils/freebots-cache';
+import { localize } from '@deriv-com/translations';
+import { fetchXmlWithCache } from '@/utils/freebots-cache';
 import './free-bots.scss';
 
-type TBotInfo = {
+interface BotData {
     name: string;
-    file: string;
     description: string;
-    difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+    difficulty: string;
     strategy: string;
     features: string[];
-    stars: number;
-    badge: string;
-};
+    xml: string;
+    badge_text?: string;
+    badge_class?: string;
+}
 
-const BOT_LIST: TBotInfo[] = [
-    { name: 'Martingale Bot', file: 'martingle.xml', description: 'Classic martingale strategy with configurable multiplier', difficulty: 'Intermediate', strategy: 'Martingale', features: ['Auto-recovery', 'Multiplier', 'Loss limit'], stars: 4, badge: 'POPULAR' },
-    { name: 'Dalembert Bot', file: 'dalembert.xml', description: 'Conservative progression strategy based on Dalembert system', difficulty: 'Beginner', strategy: 'Dalembert', features: ['Conservative', 'Stable', 'Low risk'], stars: 4, badge: 'SAFE' },
-    { name: 'Fibonacci Bot', file: 'fibonaccibot.xml', description: 'Fibonacci sequence-based stake management', difficulty: 'Intermediate', strategy: 'Fibonacci', features: ['Sequence', 'Auto-reset', 'Trend'], stars: 4, badge: '' },
-    { name: 'Test Bot', file: 'test.xml', description: 'Basic test bot for learning the platform', difficulty: 'Beginner', strategy: 'Random', features: ['Demo', 'Simple', 'Learning'], stars: 3, badge: '' },
-    { name: 'Accumulator Bot', file: 'Accumulator.xml', description: 'Accumulates profits over multiple small trades', difficulty: 'Beginner', strategy: 'Accumulation', features: ['Steady', 'Low stakes', 'Compound'], stars: 4, badge: 'STEADY' },
-    { name: 'Smart Bot', file: 'smartbot.xml', description: 'AI-inspired adaptive trading strategy', difficulty: 'Advanced', strategy: 'Adaptive', features: ['AI logic', 'Pattern detection', 'Dynamic'], stars: 5, badge: 'SMART' },
-    { name: 'Rising / Falling Bot', file: 'RisingFalling.xml', description: 'Trades on rising and falling markets simultaneously', difficulty: 'Intermediate', strategy: 'Bilateral', features: ['Two-way', 'Hedge', 'Market split'], stars: 4, badge: '' },
-    { name: 'Multiplier Bot', file: 'Multiplier.xml', description: 'Configurable multiplier for aggressive growth', difficulty: 'Advanced', strategy: 'Multiplier', features: ['High leverage', 'Aggressive', 'Configurable'], stars: 4, badge: 'POWER' },
-    { name: 'Trade Bot', file: 'tradebot.xml', description: 'General-purpose automated trading bot', difficulty: 'Beginner', strategy: 'General', features: ['Flexible', 'Multi-market', 'Auto'], stars: 3, badge: '' },
-    { name: 'DMZ-Martingale Bot', file: 'DMZ-martingle.xml', description: 'Modified martingale with directional bias', difficulty: 'Advanced', strategy: 'Modified Martingale', features: ['Directional', 'Modified', 'Advanced risk'], stars: 4, badge: 'ADVANCED' },
-    { name: 'Digit Difference Bot', file: 'DigitDifference.xml', description: 'Trades based on digit difference patterns', difficulty: 'Intermediate', strategy: 'Digit Analysis', features: ['Pattern', 'Digit-focused', 'Statistical'], stars: 4, badge: '' },
-    { name: 'Digits Bot', file: 'Digits.xml', description: 'Pure digit-based trading with multiple strategies', difficulty: 'Intermediate', strategy: 'Digit Trading', features: ['Multi-strategy', 'Digit patterns', 'Flexible'], stars: 4, badge: 'VERSATILE' },
-    { name: 'Over / Under Bot', file: 'OverUnder.xml', description: 'Over/under digit prediction bot', difficulty: 'Beginner', strategy: 'Over/Under', features: ['Simple', 'Predictable', 'Low risk'], stars: 4, badge: 'EASY' },
-    { name: 'Rise / Fall Bot', file: 'RiseFall.xml', description: 'Classic rise/fall prediction bot', difficulty: 'Beginner', strategy: 'Rise/Fall', features: ['Classic', 'Simple', 'Popular'], stars: 5, badge: 'TOP' },
-];
-
-const getDifficultyClass = (d: string) => {
-    if (d === 'Beginner') return 'free-bot-card__badge--beginner';
-    if (d === 'Intermediate') return 'free-bot-card__badge--intermediate';
-    return 'free-bot-card__badge--advanced';
-};
+const DEFAULT_FEATURES = ['Automated Trading', 'Risk Management', 'Profit Optimization'];
 
 const FreeBots = observer(() => {
-    const { run_panel, blockly_store } = useStore();
-    const [xmlFiles, setXmlFiles] = useState<string[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [loadingBot, setLoadingBot] = useState<string | null>(null);
+    const { dashboard, load_modal } = useStore();
+    const { setActiveTab } = dashboard;
+    const [availableBots, setAvailableBots] = useState<BotData[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const getBotDescription = (botName: string): string => {
+        const descriptions: { [key: string]: string } = {
+            'STARTER BOT': 'Official starter bot. Optimized for beginners with standard risk management.',
+            'POVERTY KILLER': 'High-performance digit trading bot with intelligent recovery and profit optimization.',
+            'POVERTY KILLER V2.1': 'Updated version with enhanced performance and risk management.',
+            'BEST RISE FALL': 'Automated rise and fall strategy optimized for consistent returns.',
+            'MAKOTI AUTOMATED RISE FALL': 'Premium rise and fall strategy with advanced entry points and recovery.',
+            'OVER1 R32 PRO': 'Professional Over 1 bot with R32 recovery strategy.',
+            'OVER2 R43 PRO': 'Advanced Over 2 bot with R43 recovery system.',
+            'THE CMV PRO': 'Premium CMV Pro trading bot with multi-strategy approach.',
+            'UNDER BLAST PRO': 'High-performance Under trading bot with blast strategy.',
+            'UNDER7 R56 PRO': 'Professional Under 7 bot with R56 recovery mechanism.',
+            'UNDER8 R67 PRO': 'Advanced Under 8 bot with R67 recovery system.',
+            'MAKOTIV3RISE FALL': 'Premium Rise/Fall bot with MACD analysis and intelligent recovery.',
+            'MAKOTI RISE/FALL V4': 'Latest version with improved entry signals and advanced recovery management.',
+            'FREE BOT WITH MARTINGALE': 'Simple martingale bot. Doubles stake after each loss, resets on win.',
+        };
+
+        for (const key in descriptions) {
+            if (botName.includes(key) || key.includes(botName)) {
+                return descriptions[key];
+            }
+        }
+        return `Advanced trading bot: ${botName}. Features automated trading and risk management.`;
+    };
+
+    const getXmlFiles = () => [
+        'STARTER_BOT.xml',
+        'POVERTY_KILLER.xml',
+        'POVERTY_KILLER_V2.1.xml',
+        'BEST_RISE_FALL.xml',
+        'MAKOTI_AUTOMATED_RISE_FALL.xml',
+        'THE CMV PRO.xml',
+        'UNDER BLAST PRO.xml',
+        'OVER1_R32 PRO.xml',
+        'OVER2_R43 PRO.xml',
+        'UNDER8_R67 PRO.xml',
+        'UNDER7_R56 PRO.xml',
+        'MAKOTIV3RISE_FALL.xml',
+        'MAKOTIRISE_FALLV4.xml',
+        'FREE BOT WITH MARTINGALE.xml',
+    ];
+
+    const loadBotIntoBuilder = async (bot: BotData) => {
+        if (bot.xml) {
+            try {
+                let workspace = window.Blockly?.derivWorkspace;
+                if (!workspace) {
+                    for (let i = 0; i < 10; i++) {
+                        await new Promise(r => setTimeout(r, 200));
+                        workspace = window.Blockly?.derivWorkspace;
+                        if (workspace) break;
+                    }
+                }
+
+                if (!workspace || !window.Blockly) {
+                    console.warn('Blockly workspace not available');
+                    setActiveTab(DBOT_TABS.BOT_BUILDER);
+                    return;
+                }
+
+                const xmlDom = window.Blockly.utils.xml.textToDom(bot.xml);
+                workspace.clear();
+                window.Blockly.Xml.domToWorkspace(xmlDom, workspace);
+                workspace.strategy_to_load = bot.xml;
+                workspace.current_strategy_id = `freebot_${Date.now()}`;
+
+                setActiveTab(DBOT_TABS.BOT_BUILDER);
+            } catch (err) {
+                console.error('Failed to load bot:', err);
+                setActiveTab(DBOT_TABS.BOT_BUILDER);
+            }
+        }
+    };
 
     useEffect(() => {
-        const loadBotList = async () => {
+        const loadBots = async () => {
+            setError(null);
+
+            const manifest = getXmlFiles().map(file => ({ name: file.replace('.xml', ''), file }));
+
+            const skeletonBots: BotData[] = manifest.map(item => {
+                const botName = (item.name || item.file.replace('.xml', '')).replace(/[_-]/g, ' ').replace('MAKOTIRISE FALLV4', 'MAKOTI RISE/FALL V4');
+                const isPremiumPlus = botName.includes('MAKOTI RISE/FALL V4');
+                return {
+                    name: botName,
+                    description: getBotDescription(botName),
+                    difficulty: 'Intermediate',
+                    strategy: 'Multi-Strategy',
+                    features: DEFAULT_FEATURES,
+                    xml: '',
+                    badge_text: isPremiumPlus ? 'PREMIUM PLUS' : 'PREMIUM',
+                    badge_class: isPremiumPlus ? 'premium-plus' : 'premium',
+                };
+            });
+            setAvailableBots(skeletonBots);
+            setIsLoading(false);
+
             try {
-                const files = BOT_LIST.map(b => b.file);
-                setXmlFiles(files);
-                prefetchAllXmlInBackground(files);
-            } catch (e) {
-                console.error('Failed to load bot list:', e);
-            } finally {
-                setLoading(false);
+                const loadedBots: BotData[] = [];
+                for (let i = 0; i < manifest.length; i++) {
+                    const item = manifest[i];
+                    try {
+                        const xml = await fetchXmlWithCache(item.file);
+                        if (xml) {
+                            const botName = (item.name || item.file.replace('.xml', '')).replace(/[_-]/g, ' ').replace('MAKOTIRISE FALLV4', 'MAKOTI RISE/FALL V4');
+                            const isPremiumPlus = botName.includes('MAKOTI RISE/FALL V4');
+                            loadedBots.push({
+                                name: botName,
+                                description: getBotDescription(botName),
+                                difficulty: 'Intermediate',
+                                strategy: 'Multi-Strategy',
+                                features: DEFAULT_FEATURES,
+                                xml,
+                                badge_text: isPremiumPlus ? 'PREMIUM PLUS' : 'PREMIUM',
+                                badge_class: isPremiumPlus ? 'premium-plus' : 'premium',
+                            });
+                            setAvailableBots([...loadedBots, ...skeletonBots.slice(loadedBots.length)]);
+                        }
+                    } catch (err) {
+                        console.warn(`Failed to load ${item.file}:`, err);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading bots:', error);
+                setError('Failed to load bots. Please try again.');
             }
         };
-        loadBotList();
+
+        loadBots();
     }, []);
 
-    const loadBot = useCallback(async (bot: TBotInfo) => {
-        if (loadingBot) return;
-        setLoadingBot(bot.file);
-        try {
-            const xml = await fetchXmlWithCache(bot.file);
-            if (!xml) {
-                console.error('Failed to load bot XML:', bot.file);
-                return;
-            }
-
-            if (blockly_store?.workspace) {
-                const Blockly = window.Blockly;
-                if (Blockly) {
-                    const dom = Blockly.utils.xml.textToDom(xml);
-                    Blockly.Xml.clearWorkspaceAndLoadFromXml(dom, blockly_store.workspace);
-                }
-            }
-
-            if (run_panel?.setActiveTab) {
-                run_panel.setActiveTab(1);
-            }
-        } catch (e) {
-            console.error('Error loading bot:', e);
-        } finally {
-            setLoadingBot(null);
-        }
-    }, [loadingBot, run_panel, blockly_store]);
-
-    if (loading) {
-        return (
-            <div className="free-bots">
-                <div className="free-bots__loading">Loading bots...</div>
-            </div>
-        );
-    }
-
     return (
-        <div className="free-bots">
-            <div className="free-bots__container">
-                {BOT_LIST.length === 0 ? (
-                    <div className="free-bots__empty">No bots available</div>
+        <div className='free-bots'>
+            <div className='free-bots__container'>
+                {isLoading ? (
+                    <div className='free-bots__loading'>
+                        <Text size='s' color='general'>
+                            {localize('Loading free bots...')}
+                        </Text>
+                    </div>
+                ) : error ? (
+                    <div className='free-bots__error'>
+                        <Text size='s' color='general'>{error}</Text>
+                        <div style={{ marginTop: '20px' }}>
+                            <Button onClick={() => window.location.reload()}>{localize('Retry')}</Button>
+                        </div>
+                    </div>
+                ) : availableBots.length === 0 ? (
+                    <div className='free-bots__empty'>
+                        <Text size='s' color='general'>
+                            {localize('No bots available at the moment.')}
+                        </Text>
+                    </div>
                 ) : (
-                    <div className="free-bots__grid">
-                        {BOT_LIST.map((bot) => (
+                    <div className='free-bots__grid'>
+                        {availableBots.map((bot, index) => (
                             <div
-                                key={bot.file}
-                                className="free-bot-card"
-                                data-badge={bot.badge}
+                                key={index}
+                                className={`free-bot-card ${bot.badge_class ? `free-bot-card--${bot.badge_class}` : ''}`}
+                                data-badge={bot.badge_text || 'PREMIUM'}
                             >
-                                <div className="free-bot-card__header">
-                                    <div className="free-bot-card__title">{bot.name}</div>
+                                <div className='free-bot-card__header'>
+                                    <Text size='s' weight='bold' className='free-bot-card__title'>
+                                        {bot.name}
+                                    </Text>
+                                    <div className='free-bot-card__rating'>
+                                        <span className='star'>★</span>
+                                        <span className='star'>★</span>
+                                        <span className='star'>★</span>
+                                        <span className='star'>★</span>
+                                        <span className='star'>★</span>
+                                    </div>
+                                    <Text size='xs' className='free-bot-card__description'>
+                                        {bot.description}
+                                    </Text>
                                 </div>
-                                <div className="free-bot-card__rating">
-                                    {Array.from({ length: 5 }).map((_, i) => (
-                                        <span key={i} className={`star ${i < bot.stars ? 'filled' : ''}`}>
-                                            {i < bot.stars ? '\u2605' : '\u2606'}
-                                        </span>
-                                    ))}
-                                </div>
-                                <div className="free-bot-card__description">{bot.description}</div>
-                                <div className="free-bot-card__badges">
-                                    <span className={`free-bot-card__badge ${getDifficultyClass(bot.difficulty)}`}>
+
+                                <div className='free-bot-card__badges'>
+                                    <span className={`free-bot-card__badge free-bot-card__badge--${bot.difficulty.toLowerCase()}`}>
                                         {bot.difficulty}
                                     </span>
-                                    <span className="free-bot-card__badge free-bot-card__badge--strategy">
+                                    <span className='free-bot-card__badge free-bot-card__badge--strategy'>
                                         {bot.strategy}
                                     </span>
                                 </div>
-                                <div className="free-bot-card__features">
-                                    {bot.features.map((f) => (
-                                        <span key={f} className="free-bot-card__feature-tag">{f}</span>
+
+                                <div className='free-bot-card__features'>
+                                    {bot.features.map((f, i) => (
+                                        <span key={i} className='free-bot-card__feature-tag'>{f}</span>
                                     ))}
                                 </div>
-                                <button
-                                    className="free-bot-card__load-btn"
-                                    onClick={() => loadBot(bot)}
-                                    disabled={!!loadingBot}
+
+                                <Button
+                                    className='free-bot-card__load-btn'
+                                    onClick={() => loadBotIntoBuilder(bot)}
+                                    primary
+                                    has_effect
+                                    type='button'
+                                    disabled={!bot.xml}
                                 >
-                                    {loadingBot === bot.file ? 'Loading...' : 'Load Bot'}
-                                </button>
+                                    {bot.xml ? 'LOAD PREMIUM BOT' : 'LOADING...'}
+                                </Button>
                             </div>
                         ))}
                     </div>

@@ -104,6 +104,12 @@
         align-items: center;
         gap: 4px;
         white-space: nowrap;
+
+        &::before {
+            content: '\1F916';
+            font-size: 11px;
+            flex-shrink: 0;
+        }
     }
 
     &__rating {
