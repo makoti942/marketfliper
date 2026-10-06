@@ -112,6 +112,21 @@ const ManualTrader = observer(() => {
         return () => { cancelled = true; };
     }, [symbol, selectedDigit, stake, currency]);
 
+    useEffect(() => {
+        const api = api_base.api;
+        if (!api || !contract?.contract_id) return undefined;
+        const subscription = api.onMessage().subscribe(({ data }) => {
+            if (data?.msg_type !== 'proposal_open_contract') return;
+            const openContract = data.proposal_open_contract;
+            if (String(openContract?.contract_id) !== String(contract.contract_id)) return;
+            setContract(previous => ({ ...previous, ...openContract }));
+            if (openContract.is_sold || openContract.status === 'won' || openContract.status === 'lost') {
+                setPurchaseState('settled');
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, [contract?.contract_id]);
+
     const buyContract = async direction => {
         const proposal = proposals[direction];
         if (!proposal?.id || !proposal?.ask_price) {
@@ -199,7 +214,9 @@ const ManualTrader = observer(() => {
                             <small>{localize('Payout')} <strong>{proposals.under?.payout ? `${Number(proposals.under.payout).toFixed(2)} ${currency}` : '—'}</strong></small>
                         </button>
                     </div>
-                    {purchaseState === 'open' && contract?.contract_id && <p className='manual-trader__status manual-trader__status--success'>{localize('Contract purchased')} · {contract.contract_id}</p>}
+                    {contract?.contract_id && <p className={`manual-trader__status manual-trader__status--${purchaseState === 'settled' ? (contract.status === 'won' ? 'success' : 'error') : 'success'}`}>
+                        {purchaseState === 'settled' ? `${localize('Contract')} ${contract.status ?? localize('settled')}` : localize('Contract purchased')} · {contract.contract_id}
+                    </p>}
                     {error && <p className='manual-trader__status manual-trader__status--error'>{error}</p>}
                 </div>
             </div>
