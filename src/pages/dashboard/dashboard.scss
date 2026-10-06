@@ -458,3 +458,104 @@
         margin-inline-start: 0.4rem;
     }
 }
+
+// Neon dashboard treatment: preserve the existing actions while making the
+// mobile experience feel like a focused trading control centre.
+.tab__dashboard__content {
+    background:
+        radial-gradient(circle at 12% 0%, rgb(93 62 170 / 16%), transparent 32rem),
+        linear-gradient(145deg, #071526 0%, #06101f 62%, #08182b 100%);
+    color: #f6f8ff;
+}
+
+.tab__dashboard__header {
+    padding: 2.4rem 2.4rem 1.2rem;
+    .title,
+    .subtitle { color: #f6f8ff !important; }
+    .title {
+        height: auto;
+        text-align: start;
+        font-size: clamp(2rem, 4vw, 3.2rem);
+        letter-spacing: -0.04em;
+    }
+    .subtitle {
+        max-width: 52rem;
+        margin: 0.8rem 0 0;
+        color: #97a5bc !important;
+        text-align: start;
+    }
+}
+
+.tab__dashboard__table__tiles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.4rem;
+    padding: 1.2rem 2.4rem 3rem;
+    max-width: 76rem;
+    margin: 0 auto;
+}
+
+.tab__dashboard__table__block {
+    --card-accent: #ff765d;
+    position: relative;
+    display: block;
+    min-height: 18rem;
+    padding: 1.6rem;
+    overflow: hidden;
+    border: 1px solid rgb(136 160 194 / 27%);
+    border-top: 3px solid var(--card-accent);
+    border-radius: 1.8rem;
+    background: linear-gradient(145deg, rgb(24 43 67 / 92%), rgb(8 22 39 / 95%));
+    box-shadow: inset 0 1px rgb(255 255 255 / 4%), 0 1.2rem 2.4rem rgb(0 0 0 / 20%);
+    text-align: start;
+    cursor: pointer;
+    transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    &:hover { transform: translateY(-2px); border-color: var(--card-accent); box-shadow: 0 1rem 2.4rem rgb(0 0 0 / 26%); }
+    &--green { --card-accent: #19df9b; }
+    &--purple { --card-accent: #b27cff; }
+    &--yellow { --card-accent: #f4ca27; }
+}
+
+.tab__dashboard__table__block-header { display: flex; align-items: flex-start; justify-content: space-between; }
+
+.tab__dashboard__table__images {
+    display: grid;
+    place-items: center;
+    width: 6.2rem;
+    height: 6.2rem;
+    margin: 0 0 1.4rem;
+    padding: 0.8rem;
+    border: 1px solid rgb(255 255 255 / 8%);
+    border-radius: 1.4rem;
+    background: color-mix(in srgb, var(--card-accent) 12%, #102b45);
+    svg { max-width: 4.8rem; max-height: 4.8rem; }
+}
+
+.tab__dashboard__table__arrow {
+    display: grid;
+    place-items: center;
+    width: 3.6rem;
+    height: 3.6rem;
+    border: 1px solid rgb(141 173 210 / 28%);
+    border-radius: 1.1rem;
+    color: #b8c9df;
+    font-size: 2rem;
+}
+
+.tab__dashboard__table__title {
+    display: block;
+    width: auto !important;
+    color: #f6f8ff !important;
+    font-size: 1.7rem !important;
+    font-weight: 750;
+    text-align: start !important;
+}
+
+.tab__dashboard__table__description { min-height: 3.8rem; margin: 0.6rem 0 1.4rem; color: #93a4bb; font-size: 1.3rem; line-height: 1.45; }
+.tab__dashboard__table__open { display: block; padding-top: 1.2rem; border-top: 1px solid rgb(136 160 194 / 18%); color: var(--card-accent); font-size: 1.35rem; font-weight: 750; }
+
+@include mobile-or-tablet-screen {
+    .tab__dashboard__header { padding: 1.8rem 1.6rem 0.8rem; }
+    .tab__dashboard__table__tiles { padding: 1rem 1.6rem 2.4rem; gap: 1.2rem; }
+    .tab__dashboard__table__block { min-height: 17rem; padding: 1.4rem; }
+}

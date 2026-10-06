@@ -32,6 +32,8 @@ type TCardArray = {
     id: string;
     icon: React.ReactElement;
     content: React.ReactElement;
+    description: string;
+    tone: 'orange' | 'green' | 'purple' | 'yellow';
     callback: () => void;
 };
 
@@ -65,6 +67,8 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
                 <DerivLightMyComputerIcon height='48px' width='48px' />
             ),
             content: is_mobile ? <Localize i18n_default_text='Local' /> : <Localize i18n_default_text='My computer' />,
+            description: localize('Import an XML bot from your computer'),
+            tone: 'orange',
             callback: () => {
                 openFileLoader();
                 /* [AI] - Analytics event tracking removed - see migrate-docs/MONITORING_PACKAGES.md for re-implementation guide */
@@ -75,6 +79,8 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
             id: 'google-drive',
             icon: <DerivLightGoogleDriveIcon height='48px' width='48px' />,
             content: <Localize i18n_default_text='Google Drive' />,
+            description: localize('Open a strategy saved in Google Drive'),
+            tone: 'green',
             callback: () => {
                 openGoogleDriveDialog();
                 /* [AI] - Analytics event tracking removed - see migrate-docs/MONITORING_PACKAGES.md for re-implementation guide */
@@ -85,6 +91,8 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
             id: 'bot-builder',
             icon: <DerivLightBotBuilderIcon height='48px' width='48px' />,
             content: <Localize i18n_default_text='Bot Builder' />,
+            description: localize('Build a custom bot with the visual editor'),
+            tone: 'purple',
             callback: () => {
                 setActiveTab(DBOT_TABS.BOT_BUILDER);
                 /* [AI] - Analytics event tracking removed - see migrate-docs/MONITORING_PACKAGES.md for re-implementation guide */
@@ -95,6 +103,8 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
             id: 'quick-strategy',
             icon: <DerivLightQuickStrategyIcon height='48px' width='48px' />,
             content: <Localize i18n_default_text='Quick strategy' />,
+            description: localize('Start fast with a pre-built strategy template'),
+            tone: 'yellow',
             callback: () => {
                 setActiveTab(DBOT_TABS.BOT_BUILDER);
                 setFormVisibility(true);
@@ -120,31 +130,35 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
                     id='tab__dashboard__table__tiles'
                 >
                     {actions.map(icons => {
-                        const { icon, content, callback, id } = icons;
+                        const { icon, content, callback, id, description, tone } = icons;
                         return (
                             <div
                                 key={id}
                                 className={classNames('tab__dashboard__table__block', {
                                     'tab__dashboard__table__block--minimized': has_dashboard_strategies && is_mobile,
+                                    [`tab__dashboard__table__block--${tone}`]: true,
                                 })}
+                                onClick={callback}
                             >
-                                <div
-                                    className={classNames('tab__dashboard__table__images', {
-                                        'tab__dashboard__table__images--minimized': has_dashboard_strategies,
-                                    })}
-                                    width='8rem'
-                                    height='8rem'
-                                    icon={icon}
-                                    id={id}
-                                    onClick={() => {
-                                        callback();
-                                    }}
-                                >
-                                    {icon}
+                                <div className='tab__dashboard__table__block-header'>
+                                    <div
+                                        className={classNames('tab__dashboard__table__images', {
+                                            'tab__dashboard__table__images--minimized': has_dashboard_strategies,
+                                        })}
+                                        width='8rem'
+                                        height='8rem'
+                                        icon={icon}
+                                        id={id}
+                                    >
+                                        {icon}
+                                    </div>
+                                    <span className='tab__dashboard__table__arrow' aria-hidden='true'>→</span>
                                 </div>
-                                <Text color='prominent' size={is_mobile ? 'xxs' : 'xs'}>
+                                <Text className='tab__dashboard__table__title' color='prominent' size={is_mobile ? 'xxs' : 'xs'}>
                                     {content}
                                 </Text>
+                                <p className='tab__dashboard__table__description'>{description}</p>
+                                <span className='tab__dashboard__table__open'>{localize('Open')} →</span>
                             </div>
                         );
                     })}

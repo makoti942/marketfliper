@@ -90,7 +90,8 @@ const FreeBots = observer(() => {
                 }
 
                 const xmlDom = window.Blockly.utils.xml.textToDom(bot.xml);
-                workspace.clear();
+                // The vendored Blockly type omits clear(), although the runtime workspace exposes it.
+                (workspace as unknown as { clear: () => void }).clear();
                 window.Blockly.Xml.domToWorkspace(xmlDom, workspace);
                 workspace.strategy_to_load = bot.xml;
                 workspace.current_strategy_id = `freebot_${Date.now()}`;

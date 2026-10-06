@@ -293,3 +293,15 @@
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }
 }
+
+// Compact mobile trading header palette.
+.app-header {
+    background: linear-gradient(180deg, #102540, #0b1d33) !important;
+    border-bottom: 1px solid rgb(102 148 204 / 22%);
+    .app-header__account-settings,
+    .notifications__wrapper,
+    .app-header__menu { color: #dbe8fb; }
+    .deriv-account-switcher__balance,
+    .deriv-account-switcher__currency { color: #31ddb1; }
+    .deriv-account-switcher__balance button { border-color: rgb(58 219 180 / 65%); background: rgb(14 70 70 / 60%); }
+}
