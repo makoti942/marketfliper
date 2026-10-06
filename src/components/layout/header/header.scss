@@ -305,3 +305,8 @@
     .deriv-account-switcher__currency { color: #31ddb1; }
     .deriv-account-switcher__balance button { border-color: rgb(58 219 180 / 65%); background: rgb(14 70 70 / 60%); }
 }
+
+.app-header--mobile {
+    .auth-actions { margin-inline-start: auto; }
+    .account-info { display: flex; align-items: center; }
+}
