@@ -33,8 +33,24 @@ import {
 import {
     LabelPairedChartLineCaptionRegularIcon,
     LabelPairedObjectsColumnCaptionRegularIcon,
+    LabelPairedPlayLgFillIcon,
     LabelPairedPuzzlePieceTwoCaptionBoldIcon,
 } from '@deriv/quill-icons/LabelPaired';
+                            <div
+                                label={
+                                    <>
+                                        <LabelPairedPlayLgFillIcon
+                                            height='24px'
+                                            width='24px'
+                                            fill='var(--text-general)'
+                                        />
+                                        <Localize i18n_default_text='Manual Trade' />
+                                    </>
+                                }
+                                id='id-manual-trade'
+                            >
+                                <ManualTrade />
+                            </div>
 import { LegacyGuide1pxIcon } from '@deriv/quill-icons/Legacy';
 import { Localize, localize } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
@@ -42,12 +58,15 @@ import RunPanel from '../../components/run-panel';
 import ChartModal from '../chart/chart-modal';
 import Dashboard from '../dashboard';
 import RunStrategy from '../dashboard/run-strategy';
+import ManualTrade from '../manual-trade';
+import TradingViewComponent from '@/components/trading-view-chart/trading-view';
+import TradingViewTrading from '@/components/trading-view-chart/trading-view-trading';
+import Analysis from '../analysis/analysis';
 import './main.scss';
 
 const ChartWrapper = lazy(() => import('../chart/chart-wrapper'));
 const FreeBots = lazy(() => import('../free-bots/free-bots'));
 const Tutorial = lazy(() => import('../tutorials'));
-const ManualTrader = lazy(() => import('../manual-trader/manual-trader'));
 
 const AppWrapper = observer(() => {
     const { connectionStatus } = useApiBase();
@@ -78,9 +97,8 @@ const AppWrapper = observer(() => {
         [key: string]: string;
     };
     const { clear } = summary_card;
-    const { DASHBOARD, BOT_BUILDER } = DBOT_TABS;
+    const { DASHBOARD, BOT_BUILDER, TRADING_BOTS, ANALYSIS, MANUAL_TRADE, COPY_TRADING, BOT_EXTRACTOR } = DBOT_TABS;
     const init_render = React.useRef(true);
-    const hash = ['dashboard', 'bot_builder', 'chart', 'trading_bots', 'tutorial', 'manual_trader'];
     const { isDesktop } = useDevice();
     const location = useLocation();
     const navigate = useNavigate();
@@ -370,7 +388,7 @@ const AppWrapper = observer(() => {
     // [/AI]
     return (
         <React.Fragment>
-            <div className='main'>
+            <div className={classNames('main', { 'main--manual-trade-active': active_tab === MANUAL_TRADE || active_tab === ANALYSIS, 'main--copy-trading-active': active_tab === COPY_TRADING })}>
                 <div
                     className={classNames('main__container', {
                         'main__container--active': active_tour && active_tab === DASHBOARD && !isDesktop,

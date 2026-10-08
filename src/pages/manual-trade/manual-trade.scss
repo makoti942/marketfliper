@@ -1,0 +1,865 @@
+@use 'components/shared/styles/mixins' as *;
+
+$accent:   #f97316;
+$accent2:  #ef4444;
+$bg:       #0f1117;
+$bg2:      #181c27;
+$bg3:      #1e2336;
+$border:   rgba(249,115,22,0.2);
+$text:     #e2e8f0;
+$muted:    #64748b;
+$win:      #22c55e;
+$loss:     #ef4444;
+$radius:   10px;
+
+.mt-page {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: $bg;
+    color: $text;
+    padding: 12px 16px 80px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    gap: 12px;
+
+    @include mobile-or-tablet-screen {
+        padding: 8px 10px 16px;
+        gap: 8px;
+    }
+}
+
+.mt-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: $muted;
+    font-size: 14px;
+}
+
+/* minmax(0, 1fr) + min-width: 0 prevent grid blowout — without them the
+   chart's min-content width forces the page to scroll sideways. */
+.mt-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    gap: 16px;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+
+    @include mobile-or-tablet-screen {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+}
+
+/* ── Tick section (left) ───────────────────────────── */
+.mt-tick-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+
+.mt-symbol-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mt-select {
+    flex: 1;
+    background: $bg2;
+    border: 1px solid $border;
+    border-radius: $radius;
+    color: $text;
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    &:focus { outline: none; border-color: $accent; }
+}
+
+.mt-status {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    &--on { background: rgba($win, 0.15); color: $win; }
+    &--off { background: rgba($loss, 0.15); color: $loss; }
+}
+
+.mt-tick-display {
+    background: $bg2;
+    border: 1px solid $border;
+    border-radius: $radius;
+    padding: 20px;
+    text-align: center;
+
+    @include mobile-or-tablet-screen {
+        padding: 12px;
+    }
+}
+
+.mt-price {
+    font-size: 28px;
+    font-weight: 700;
+    color: $accent;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+
+    @include mobile-or-tablet-screen {
+        font-size: 22px;
+    }
+}
+
+.mt-digit-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.mt-last-digit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, $accent, $accent2);
+    color: #fff;
+    font-size: 24px;
+    font-weight: 900;
+    box-shadow: 0 0 16px rgba($accent, 0.4);
+
+    @include mobile-or-tablet-screen {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+    }
+}
+
+.mt-digit-label {
+    font-size: 12px;
+    color: $muted;
+}
+
+/* ── Digit frequency bars ──────────────────────────── */
+.mt-stats {
+    background: $bg2;
+    border: 1px solid $border;
+    border-radius: $radius;
+    padding: 16px 18px 14px;
+
+    @include mobile-or-tablet-screen {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+.mt-stats-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13px;
+    color: $muted;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.mt-running-trade {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border: 1px solid rgba(#38bdf8, 0.42);
+    border-radius: 999px;
+    color: #7dd3fc;
+    background: rgba(#0284c7, 0.14);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.35px;
+    white-space: nowrap;
+}
+
+.mt-running-trade i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #38bdf8;
+    box-shadow: 0 0 8px #38bdf8;
+    animation: mt-running-dot 1s ease-in-out infinite;
+}
+
+@keyframes mt-running-dot {
+    0%, 100% { opacity: 0.45; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1.15); }
+}
+
+.mt-bars {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(54px, 1fr));
+    gap: 18px clamp(8px, 2vw, 22px);
+    padding: 4px 3px 10px;
+
+    @include mobile-or-tablet-screen {
+        gap: 14px 5px;
+        padding: 3px 0 8px;
+    }
+}
+
+.mt-digit-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    min-width: 0;
+    border-radius: 50%;
+    transition: transform 0.2s, filter 0.2s;
+
+    &:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.18);
+    }
+
+    &--hot .mt-digit-ring {
+        --mt-ring-color: #22c55e;
+        box-shadow: 0 0 18px rgba($win, 0.16);
+    }
+
+    &--low .mt-digit-ring {
+        --mt-ring-color: #ef3340;
+        box-shadow: 0 0 18px rgba($loss, 0.16);
+    }
+
+    &--sel .mt-digit-ring {
+        outline: 2px solid rgba($accent, 0.8);
+        outline-offset: 4px;
+    }
+
+    &--running .mt-digit-ring {
+        outline: 2px solid rgba(#38bdf8, 0.7);
+        outline-offset: 4px;
+    }
+
+    &--live .mt-digit-ring {
+        --mt-ring-color: #ff5252;
+        animation: mt-live-ring-pulse 1s ease-in-out infinite;
+
+        &::before {
+            background: linear-gradient(135deg, #ff6868, #ef4444);
+            box-shadow: inset 0 0 0 1px rgba(#fff, 0.35);
+        }
+
+        .mt-digit-ring__digit,
+        .mt-digit-ring__pct {
+            color: #fff;
+            text-shadow: 0 0 14px rgba(#ffd9d9, 0.95);
+        }
+    }
+
+    &--win .mt-digit-ring {
+        --mt-ring-color: #22c55e;
+        animation: mt-flash-win 4s ease-out forwards;
+    }
+
+    &--loss .mt-digit-ring {
+        --mt-ring-color: #ef3340;
+        animation: mt-flash-loss 4s ease-out forwards;
+    }
+}
+
+@keyframes mt-live-ring-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba($loss, 0), 0 0 0 0 rgba(#ff8a8a, 0); }
+    50% { box-shadow: 0 0 26px 6px rgba($loss, 0.9), 0 0 14px 2px rgba(#ffb3b3, 0.8); }
+}
+
+@keyframes mt-flash-win {
+    0%   { filter: brightness(1.5); box-shadow: 0 0 24px rgba($win, 0.65); }
+    60%  { filter: brightness(1.15); box-shadow: 0 0 12px rgba($win, 0.3); }
+    100% { filter: none; box-shadow: none; }
+}
+
+@keyframes mt-flash-loss {
+    0%   { filter: brightness(1.5); box-shadow: 0 0 24px rgba($loss, 0.65); }
+    60%  { filter: brightness(1.15); box-shadow: 0 0 12px rgba($loss, 0.3); }
+    100% { filter: none; box-shadow: none; }
+}
+
+.mt-digit-ring {
+    --mt-ring-color: #3b424d;
+    position: relative;
+    width: clamp(68px, 8.5vw, 96px);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #272c33 0 var(--mt-digit-arc-start), var(--mt-ring-color) var(--mt-digit-arc-start) var(--mt-digit-arc-end), #272c33 var(--mt-digit-arc-end) 360deg);
+    transition: box-shadow 0.2s, transform 0.2s;
+
+    &::before {
+        content: '';
+        position: absolute;
+        width: calc(clamp(68px, 8.5vw, 96px) - 12px);
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: $bg2;
+        box-shadow: inset 0 0 0 1px rgba(#fff, 0.02);
+    }
+}
+
+.mt-digit-ring__content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.05;
+}
+
+.mt-digit-ring__digit {
+    color: #f8fafc;
+    font-size: clamp(18px, 2.4vw, 26px);
+    font-weight: 800;
+}
+
+.mt-digit-ring__pct {
+    margin-top: 4px;
+    color: #a8b0bb;
+    font-size: clamp(10px, 1.4vw, 13px);
+    font-weight: 500;
+}
+
+.mt-growth {
+    margin-top: 6px;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    &--up  { color: $win; }
+    &--dn  { color: $loss; }
+    &--flat { color: $muted; }
+}
+
+.mt-growth__value {
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+.mt-digit-current-arrow {
+    position: absolute;
+    bottom: -14px;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-bottom: 10px solid #ff5b5b;
+    transform: translateX(-50%);
+    filter: drop-shadow(0 2px 3px rgba($loss, 0.45));
+}
+
+/* ── Trade section (right) ─────────────────────────── */
+.mt-trade-section {
+    background: $bg2;
+    border: 1px solid $border;
+    border-radius: $radius;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+    min-width: 0;
+
+    @include mobile-or-tablet-screen {
+        padding: 12px;
+        gap: 8px;
+    }
+}
+
+.mt-dd {
+    position: relative;
+    width: 100%;
+}
+
+.mt-dd-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: $radius;
+    border: 1px solid $border;
+    background: $bg3;
+    color: $text;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover { border-color: rgba($accent, 0.5); }
+    &.is-open {
+        border-color: $accent;
+        box-shadow: 0 0 12px rgba($accent, 0.25);
+    }
+}
+
+.mt-dd-caret {
+    font-size: 11px;
+    color: $muted;
+    transition: transform 0.2s;
+    .is-open & { transform: rotate(180deg); }
+}
+
+.mt-dd-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+}
+
+.mt-dd-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px;
+    border-radius: $radius;
+    border: 1px solid $border;
+    background: $bg2;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+.mt-dd-opt {
+    text-align: left;
+    padding: 9px 12px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: $muted;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    &:hover {
+        background: rgba($accent, 0.12);
+        color: $text;
+    }
+
+    &.is-active {
+        background: linear-gradient(135deg, $accent, $accent2);
+        color: #fff;
+    }
+}
+
+.mt-input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.mt-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mt-label {
+    font-size: 11px;
+    color: $muted;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.mt-input {
+    background: $bg3;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: $text;
+    padding: 8px 10px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: border-color 0.2s;
+
+    &:focus {
+        outline: none;
+        border-color: $accent;
+    }
+
+    &::-webkit-inner-spin-button { opacity: 0.5; }
+}
+
+.mt-exec-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* ── Entry digit toggle ────────────────────────────── */
+.mt-entry-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mt-entry-switch-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.mt-entry-toggle {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    background: $bg3;
+    border: 1px solid $border;
+    transition: background 0.2s, border-color 0.2s;
+    padding: 0;
+
+    &.is-on {
+        background: rgba($win, 0.25);
+        border-color: $win;
+
+        .mt-entry-toggle-knob {
+            transform: translateX(16px);
+            background: $win;
+        }
+    }
+}
+
+.mt-entry-toggle-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: $muted;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.mt-entry-digit-field {
+    width: 70px;
+}
+
+.mt-entry-timeout-field {
+    width: 80px;
+}
+
+.mt-exec {
+    padding: 13px 8px;
+    border-radius: $radius;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+
+    &--first {
+        background: linear-gradient(135deg, #16a34a, #0d9488);
+        box-shadow: 0 0 18px rgba(22, 163, 74, 0.35);
+        &:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 0 24px rgba(22, 163, 74, 0.5);
+        }
+    }
+
+    &--second {
+        background: linear-gradient(135deg, #dc2626, #c2410c);
+        box-shadow: 0 0 18px rgba(220, 38, 38, 0.35);
+        &:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 0 24px rgba(220, 38, 38, 0.5);
+        }
+    }
+
+    &:active:not(:disabled) { transform: translateY(1px); }
+
+    &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    &--cancel {
+        grid-column: 1 / -1;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        box-shadow: 0 0 18px rgba(245, 158, 11, 0.4);
+        animation: mt-pulse 1.5s ease-in-out infinite;
+        &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 24px rgba(245, 158, 11, 0.6);
+        }
+    }
+}
+
+/* Keep the complete manual-trade control surface visible on phone screens. */
+@media (max-width: 700px) {
+    .mt-page {
+        padding: 4px 6px 10px;
+        gap: 5px;
+    }
+
+    .mt-main,
+    .mt-tick-section,
+    .mt-trade-section {
+        gap: 6px;
+    }
+
+    .mt-symbol-bar { gap: 6px; }
+    .mt-select { padding: 6px 8px; font-size: 12px; }
+    .mt-status { padding: 3px 7px; font-size: 10px; }
+    .mt-tick-display { padding: 7px 8px; }
+    .mt-price { font-size: 19px; }
+    .mt-digit-row { gap: 6px; margin-top: 4px; }
+    .mt-last-digit { width: 31px; height: 31px; font-size: 16px; }
+    .mt-digit-label { font-size: 10px; }
+    .mt-history-trigger { padding: 5px 7px; font-size: 10px; }
+
+    .mt-stats { padding: 8px 9px 7px; }
+    .mt-stats-header { gap: 5px; margin-bottom: 7px; font-size: 10px; letter-spacing: 0.25px; }
+    .mt-running-trade { padding: 3px 5px; font-size: 8px; }
+    .mt-bars { gap: 12px 2px; }
+    .mt-digit-ring { width: 52px; }
+    .mt-digit-ring::before { width: 42px; }
+    .mt-digit-ring__digit { font-size: 16px; }
+    .mt-digit-ring__pct { margin-top: 2px; font-size: 9px; }
+    .mt-growth { margin-top: 4px; font-size: 7px; }
+    .mt-digit-current-arrow { bottom: -11px; border-left-width: 5px; border-right-width: 5px; border-bottom-width: 8px; }
+
+    .mt-trade-section { padding: 8px; }
+    .mt-dd-btn { padding: 7px 9px; font-size: 12px; }
+    .mt-label { font-size: 9px; }
+    .mt-input { padding: 6px 8px; font-size: 12px; }
+    .mt-input-row { gap: 6px; }
+    .mt-entry-row { gap: 6px; }
+    .mt-entry-switch-wrap { gap: 5px; }
+    .mt-entry-digit-field { width: 58px; }
+    .mt-exec-row { gap: 6px; }
+    .mt-exec { min-height: 40px; padding: 9px 4px; font-size: 11px; line-height: 1.15; }
+}
+
+@keyframes mt-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.75; }
+}
+
+.mt-hint {
+    font-size: 11px;
+    color: $muted;
+    text-align: center;
+}
+
+.mt-result {
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    &--ok { background: rgba($win, 0.1); color: $win; border: 1px solid rgba($win, 0.3); }
+    &--err { background: rgba($loss, 0.1); color: $loss; border: 1px solid rgba($loss, 0.3); }
+}
+
+.mt-dismiss {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 16px;
+    cursor: pointer;
+    opacity: 0.6;
+    &:hover { opacity: 1; }
+}
+
+/* ── Exit digit highlight (3s) ─────────────────────────────── */
+.mt-digit-card--exit {
+    background: radial-gradient(circle, rgba(#f59e0b, 0.24) 0 48%, transparent 70%);
+    box-shadow: 0 0 0 1px rgba(#f59e0b, 0.4), 0 0 22px rgba(#f59e0b, 0.36);
+    animation: mt-exit-pulse 1.2s ease-in-out infinite;
+
+    .mt-digit-ring { --mt-ring-color: #f59e0b; }
+    .mt-digit-ring__digit,
+    .mt-digit-ring__pct,
+    .mt-growth { color: #ffd166; text-shadow: 0 0 10px rgba(#f59e0b, 0.7); }
+}
+
+@keyframes mt-exit-pulse {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.22); }
+}
+
+/* ── Notification popups ───────────────────────────────────── */
+.mt-notifications {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.mt-notif {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    background: $bg2;
+    border: 1px solid $border;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    animation: mt-notif-in 0.2s ease-out;
+    min-width: 220px;
+    pointer-events: auto;
+
+    &--opened { border-color: rgba($accent, 0.4); }
+    &--closed { border-color: rgba($win, 0.4); }
+    &--error { border-color: rgba($loss, 0.4); }
+}
+
+.mt-notif-icon { font-size: 20px; }
+
+.mt-notif-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mt-notif-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: $text;
+}
+
+.mt-notif-detail {
+    font-size: 11px;
+    color: $muted;
+}
+
+@keyframes mt-notif-in {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.mt-history-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: auto;
+    padding: 7px 10px;
+    border: 1px solid rgba($accent, 0.35);
+    border-radius: 8px;
+    background: rgba($accent, 0.1);
+    color: $text;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    &:hover { background: rgba($accent, 0.2); }
+    b { color: $accent; }
+}
+
+.mt-history-trigger-icon { color: $accent; font-size: 13px; }
+
+.mt-history-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    background: rgba(0, 0, 0, 0.46);
+    animation: mt-history-fade 0.2s ease-out;
+}
+.mt-history-backdrop.is-closing { animation: mt-history-fade-out 0.28s ease-in forwards; }
+
+.mt-history-drawer {
+    position: fixed;
+    top: 5.4rem;
+    right: 0;
+    bottom: 0;
+    z-index: 100001;
+    width: min(330px, 86vw);
+    padding: 0;
+    overflow: hidden;
+    background: $bg;
+    border-left: 1px solid $border;
+    box-shadow: -14px 0 40px rgba(0, 0, 0, 0.42);
+    animation: mt-history-slide 0.24s ease-out;
+    display: flex;
+    flex-direction: column;
+}
+.mt-history-drawer.is-closing { animation: mt-history-slide-out 0.28s ease-in forwards; }
+
+.mt-history-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 14px;
+    border-bottom: 1px solid $border;
+    flex-shrink: 0;
+    background: $bg;
+    z-index: 1;
+}
+
+.mt-history-head h2 { margin: 0 0 2px; color: $text; font-size: 15px; font-weight: 600; }
+.mt-history-head span { color: $muted; font-size: 11px; }
+.mt-history-close { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; margin-top: 2px; border: 1px solid $border; border-radius: 8px; background: rgba($text, 0.04); color: $muted; font-size: 24px; line-height: 1; cursor: pointer; &:hover { color: $text; background: rgba($text, 0.1); } }
+.mt-history-summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 12px 14px; padding: 10px; border: 1px solid $border; border-radius: 9px; background: rgba($accent, 0.07); flex-shrink: 0; }
+.mt-history-summary div { display: flex; flex-direction: column; gap: 4px; }
+.mt-history-summary small { color: $muted; font-size: 9px; letter-spacing: 0.6px; }
+.mt-history-summary strong { font-size: 20px; }
+.mt-history-summary .is-profit { color: $win; }
+.mt-history-summary .is-loss { color: $loss; }
+.mt-history-clear { padding: 7px 10px; border: 1px solid $border; border-radius: 7px; background: transparent; color: $muted; font-size: 11px; font-weight: 700; cursor: pointer; &:hover:not(:disabled) { color: $text; background: rgba($text, 0.08); } &:disabled { opacity: 0.4; cursor: not-allowed; } }
+.mt-history-list { display: flex; flex-direction: column; gap: 8px; padding: 0 14px 14px; overflow-y: auto; flex: 1; }
+.mt-history-card { padding: 10px; border: 1px solid $border; border-radius: 9px; background: $bg2; }
+.mt-history-card--won { border-color: rgba($win, 0.42); }
+.mt-history-card--lost { border-color: rgba($loss, 0.42); }
+.mt-history-card-top, .mt-history-meta, .mt-history-values { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mt-history-card-top strong { color: $text; font-size: 12px; }
+.mt-history-meta { margin-top: 7px; color: $muted; font-size: 10px; }
+.mt-history-status { padding: 3px 6px; border-radius: 999px; font-size: 9px; font-weight: 800; }
+.mt-history-status--open { color: #7dd3fc; background: rgba(#0284c7, 0.18); }
+.mt-history-status--won { color: $win; background: rgba($win, 0.14); }
+.mt-history-status--lost { color: $loss; background: rgba($loss, 0.14); }
+.mt-history-spots { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 10px; }
+.mt-history-spot { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 6px 7px; border-radius: 6px; background: rgba($text, 0.04); }
+.mt-history-spot--entry { border-left: 2px solid #38bdf8; }
+.mt-history-spot--exit { border-left: 2px solid #f59e0b; }
+.mt-history-spot small { color: $muted; font-size: 7px; letter-spacing: 0.25px; line-height: 1.1; }
+.mt-history-spot b { color: $text; font-size: 16px; line-height: 1; }
+.mt-history-spot--entry b { color: #7dd3fc; }
+.mt-history-spot--exit b { color: #fbbf24; }
+.mt-history-spot--win { border-left-color: #38bdf8; }
+.mt-history-spot--win b { color: #38bdf8; }
+.mt-history-spot--loss { border-left-color: $loss; }
+.mt-history-spot--loss b { color: $loss; }
+.mt-history-values { margin-top: 10px; }
+.mt-history-values div { display: flex; flex-direction: column; gap: 3px; }
+.mt-history-values small { color: $muted; font-size: 9px; letter-spacing: 0.5px; }
+.mt-history-values b { color: $text; font-size: 14px; }
+.mt-history-values b.is-profit { color: $win; }
+.mt-history-values b.is-loss { color: $loss; }
+.mt-history-time { margin-top: 11px; color: $muted; font-size: 10px; text-align: right; }
+.mt-history-empty { display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 48px 20px; color: $muted; text-align: center; }
+.mt-history-empty strong { color: $text; }
+@keyframes mt-history-slide { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+@keyframes mt-history-slide-out { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
+@keyframes mt-history-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mt-history-fade-out { from { opacity: 1; } to { opacity: 0; } }
