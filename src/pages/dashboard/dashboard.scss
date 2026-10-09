@@ -631,7 +631,21 @@
 .tab__dashboard__table__description { flex: 1; min-height: 3.2rem; margin: 0.6rem 0 1rem; color: #93a4bb; font-size: 1.25rem; line-height: 1.5; }
 .tab__dashboard__table__open { display: flex; align-items: center; gap: 0.4rem; margin-top: auto; padding-top: 1rem; border-top: 1px solid rgb(136 160 194 / 14%); color: var(--card-accent); font-size: 1.25rem; font-weight: 700; letter-spacing: 0.01em; }
 
-@include mobile-or-tablet-screen {
-    .tab__dashboard__header { padding: 0.8rem 0 0; margin-bottom: 1.2rem; .title { font-size: clamp(1.9rem, 5vw, 2.4rem); } .subtitle { font-size: 1.25rem; } }
-    .tab__dashboard__table__block { min-height: 16.5rem; padding: 1.4rem; }
+// ── Mobile compact + scroll fix: smaller cards, visible scroll, no clipping ──
+@include mobile-screen {
+    .tab__dashboard__header { padding: 0.6rem 0 0; margin-bottom: 0.8rem; .title { font-size: clamp(1.6rem, 6vw, 2rem) !important; line-height: 1.15; } .subtitle { font-size: 1.1rem !important; line-height: 1.4; margin-top: 0.4rem; } }
+    .tab__dashboard__table__tiles { gap: 0.9rem; padding: 0.6rem 0 1.2rem; }
+    .tab__dashboard__table__block { min-height: 13.2rem; padding: 1rem 1.1rem 0.9rem; border-radius: 1.2rem; }
+    .tab__dashboard__table__block-header { margin-bottom: 0.2rem; }
+    .tab__dashboard__table__images { width: 4.2rem; height: 4.2rem; border-radius: 0.9rem; margin-bottom: 0.8rem; svg { max-width: 3.2rem; max-height: 3.2rem; } }
+    .tab__dashboard__table__arrow { width: 2.6rem; height: 2.6rem; border-radius: 0.7rem; font-size: 1.4rem; }
+    .tab__dashboard__table__title { font-size: 1.32rem !important; }
+    .tab__dashboard__table__description { font-size: 1.1rem; min-height: 2.6rem; margin: 0.4rem 0 0.7rem; line-height: 1.35; }
+    .tab__dashboard__table__open { font-size: 1.1rem; padding-top: 0.7rem; }
+}
+
+@include tablet-screen {
+    .tab__dashboard__header { padding: 0.8rem 0 0; margin-bottom: 1rem; .title { font-size: clamp(1.9rem, 4vw, 2.3rem) !important; } .subtitle { font-size: 1.2rem !important; } }
+    .tab__dashboard__table__block { min-height: 14.5rem; padding: 1.2rem; }
+    .tab__dashboard__table__images { width: 4.8rem; height: 4.8rem; }
 }

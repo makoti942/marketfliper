@@ -954,3 +954,28 @@
         0 2px 6px rgba(15,23,42,0.12),
         0 1px 0 rgba(255,255,255,0.9) inset;
 }
+
+// ── Mobile scroll fix: prevent fixed-height clipping, allow dashboard cards to scroll ──
+@include mobile-or-tablet-screen {
+    .main {
+        height: auto !important;
+        min-height: calc(100vh - 6rem);
+        overflow: visible !important;
+        overflow-y: auto !important;
+        padding-bottom: 6rem; // clear footer
+    }
+    .bot-dashboard {
+        height: auto !important;
+        min-height: auto !important;
+        overflow: visible !important;
+    }
+    .tab__dashboard,
+    .tab__dashboard__content {
+        height: auto !important;
+        min-height: auto !important;
+        overflow: visible !important;
+    }
+    .main__container .dc-tabs__content {
+        overflow: visible !important;
+    }
+}

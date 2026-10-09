@@ -110,12 +110,21 @@ section {
 
 html {
     height: 100%;
-    font-size: 10px;
+    font-size: 9px; // zoomed-out base: 90% of original (was 10px) — makes entire app smaller/professional
 }
 
 body {
     line-height: 1;
     height: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+@media (max-width: 768px) {
+    html { font-size: 8.5px; } // slightly more zoom on tablets
+}
+@media (max-width: 480px) {
+    html { font-size: 8px; } // compact on phones
 }
 
 ol,
