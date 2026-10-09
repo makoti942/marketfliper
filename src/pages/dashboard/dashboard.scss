@@ -459,103 +459,179 @@
     }
 }
 
-// Neon dashboard treatment: preserve the existing actions while making the
-// mobile experience feel like a focused trading control centre.
+// ── Professional dashboard layout: centered, responsive, no footer overlap ──
+.bot-dashboard {
+    height: auto;
+    min-height: calc(100vh - 4.4rem - 3.6rem);
+    overflow: visible;
+    overflow-y: auto;
+}
+
+.tab__dashboard {
+    min-height: calc(100vh - 8rem - 3.6rem);
+    align-items: flex-start;
+    padding-bottom: 5rem; // clear fixed .app-footer (3.6rem)
+}
+
 .tab__dashboard__content {
+    height: auto;
+    min-height: calc(100vh - 14rem);
+    overflow: visible;
+    overflow-y: auto;
+    align-items: center;
+    justify-content: flex-start;
     background:
         radial-gradient(circle at 12% 0%, rgb(93 62 170 / 16%), transparent 32rem),
         linear-gradient(145deg, #071526 0%, #06101f 62%, #08182b 100%);
     color: #f6f8ff;
+
+    @include desktop-screen {
+        padding: 2.4rem 2.4rem 5rem;
+        justify-content: center;
+    }
+    @include mobile-or-tablet-screen {
+        height: auto;
+        min-height: calc(100vh - 14rem);
+        padding: 1.6rem 1.6rem 6rem;
+        overflow: visible;
+    }
+
+    .quick-panel {
+        flex: 0 1 960px;
+        width: 100%;
+        max-width: 960px;
+        margin: 0 auto;
+    }
 }
 
 .tab__dashboard__header {
-    padding: 2.4rem 2.4rem 1.2rem;
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto 1.6rem;
+    padding: 1.2rem 0 0;
+    text-align: center;
+
     .title,
     .subtitle { color: #f6f8ff !important; }
     .title {
         height: auto;
-        text-align: start;
-        font-size: clamp(2rem, 4vw, 3.2rem);
+        text-align: center;
+        font-size: clamp(2.2rem, 3.5vw, 2.8rem);
         letter-spacing: -0.04em;
+        line-height: 1.2;
+        margin: 0;
     }
     .subtitle {
-        max-width: 52rem;
-        margin: 0.8rem 0 0;
+        max-width: 62rem;
+        margin: 0.8rem auto 0;
         color: #97a5bc !important;
-        text-align: start;
+        text-align: center;
+        font-size: 1.35rem;
+        line-height: 1.5;
     }
+}
+
+.tab__dashboard__table {
+    width: 100%;
 }
 
 .tab__dashboard__table__tiles {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.4rem;
-    padding: 1.2rem 2.4rem 3rem;
-    max-width: 76rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.6rem;
+    padding: 1.6rem 0 2rem;
+    max-width: 960px;
     margin: 0 auto;
+    align-items: stretch;
+
+    @include tablet-screen {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.4rem;
+        padding: 1.2rem 0 2rem;
+    }
+    @include mobile-screen {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+        padding: 1rem 0 2rem;
+    }
+
+    // When Google Drive is hidden (3 cards), 3-col is perfect; with 4 cards, auto-wrap still balanced
+    &:has(> :nth-child(4)) {
+        @include desktop-screen {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+        @include tablet-screen {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
 }
 
 .tab__dashboard__table__block {
     --card-accent: #ff765d;
     position: relative;
-    display: block;
-    min-height: 18rem;
-    padding: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 19rem;
+    padding: 1.8rem 1.6rem 1.4rem;
     overflow: hidden;
     border: 1px solid rgb(136 160 194 / 27%);
     border-top: 3px solid var(--card-accent);
-    border-radius: 1.8rem;
+    border-radius: 1.6rem;
     background: linear-gradient(145deg, rgb(24 43 67 / 92%), rgb(8 22 39 / 95%));
-    box-shadow: inset 0 1px rgb(255 255 255 / 4%), 0 1.2rem 2.4rem rgb(0 0 0 / 20%);
+    box-shadow: inset 0 1px rgb(255 255 255 / 4%), 0 1rem 2.4rem rgb(0 0 0 / 18%);
     text-align: start;
     cursor: pointer;
-    transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
-    &:hover { transform: translateY(-2px); border-color: var(--card-accent); box-shadow: 0 1rem 2.4rem rgb(0 0 0 / 26%); }
+    transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    &:hover { transform: translateY(-3px); border-color: var(--card-accent); box-shadow: 0 1.4rem 2.8rem rgb(0 0 0 / 24%); background: linear-gradient(145deg, rgb(28 50 78 / 96%), rgb(10 28 48 / 98%)); }
+    &:active { transform: translateY(-1px); }
     &--green { --card-accent: #19df9b; }
     &--purple { --card-accent: #b27cff; }
     &--yellow { --card-accent: #f4ca27; }
+    &--orange { --card-accent: #ff765d; }
 }
 
-.tab__dashboard__table__block-header { display: flex; align-items: flex-start; justify-content: space-between; }
+.tab__dashboard__table__block-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.4rem; }
 
 .tab__dashboard__table__images {
     display: grid;
     place-items: center;
-    width: 6.2rem;
-    height: 6.2rem;
-    margin: 0 0 1.4rem;
-    padding: 0.8rem;
+    width: 5.6rem;
+    height: 5.6rem;
+    margin: 0 0 1.2rem;
+    padding: 0.7rem;
     border: 1px solid rgb(255 255 255 / 8%);
-    border-radius: 1.4rem;
-    background: color-mix(in srgb, var(--card-accent) 12%, #102b45);
-    svg { max-width: 4.8rem; max-height: 4.8rem; }
+    border-radius: 1.2rem;
+    background: color-mix(in srgb, var(--card-accent) 14%, #102b45);
+    svg { max-width: 4.2rem; max-height: 4.2rem; }
 }
 
 .tab__dashboard__table__arrow {
     display: grid;
     place-items: center;
-    width: 3.6rem;
-    height: 3.6rem;
-    border: 1px solid rgb(141 173 210 / 28%);
-    border-radius: 1.1rem;
+    width: 3.2rem;
+    height: 3.2rem;
+    border: 1px solid rgb(141 173 210 / 24%);
+    border-radius: 0.9rem;
     color: #b8c9df;
-    font-size: 2rem;
+    font-size: 1.8rem;
+    background: rgb(255 255 255 / 4%);
 }
 
 .tab__dashboard__table__title {
     display: block;
     width: auto !important;
     color: #f6f8ff !important;
-    font-size: 1.7rem !important;
-    font-weight: 750;
+    font-size: 1.55rem !important;
+    font-weight: 700;
+    line-height: 1.25;
     text-align: start !important;
+    margin: 0;
 }
 
-.tab__dashboard__table__description { min-height: 3.8rem; margin: 0.6rem 0 1.4rem; color: #93a4bb; font-size: 1.3rem; line-height: 1.45; }
-.tab__dashboard__table__open { display: block; padding-top: 1.2rem; border-top: 1px solid rgb(136 160 194 / 18%); color: var(--card-accent); font-size: 1.35rem; font-weight: 750; }
+.tab__dashboard__table__description { flex: 1; min-height: 3.2rem; margin: 0.6rem 0 1rem; color: #93a4bb; font-size: 1.25rem; line-height: 1.5; }
+.tab__dashboard__table__open { display: flex; align-items: center; gap: 0.4rem; margin-top: auto; padding-top: 1rem; border-top: 1px solid rgb(136 160 194 / 14%); color: var(--card-accent); font-size: 1.25rem; font-weight: 700; letter-spacing: 0.01em; }
 
 @include mobile-or-tablet-screen {
-    .tab__dashboard__header { padding: 1.8rem 1.6rem 0.8rem; }
-    .tab__dashboard__table__tiles { padding: 1rem 1.6rem 2.4rem; gap: 1.2rem; }
-    .tab__dashboard__table__block { min-height: 17rem; padding: 1.4rem; }
+    .tab__dashboard__header { padding: 0.8rem 0 0; margin-bottom: 1.2rem; .title { font-size: clamp(1.9rem, 5vw, 2.4rem); } .subtitle { font-size: 1.25rem; } }
+    .tab__dashboard__table__block { min-height: 16.5rem; padding: 1.4rem; }
 }
