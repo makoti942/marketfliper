@@ -615,4 +615,5 @@ export function useManualTrade() {
             req_id: subId,
         });
         if (sent) lastTickTimeRef.current = Date.now();
+    }
     }, []);
