@@ -599,13 +599,13 @@ export function useManualTrade() {
     const resubscribeTicks = useCallback(() => {
         if (!symbolRef.current) return;
         if (subIdRef.current) {
-            sendViaNewSystem({ forget: subIdRef.current });
+        const sent = sendViaNewSystem({
             subIdRef.current = null;
         }
         subReqIdRef.current = 0;
         const subId = ++reqIdRef.current;
         subReqIdRef.current = subId;
-        sendViaNewSystem({
+        const sent = sendViaNewSystem({
             ticks_history: symbolRef.current,
             count: 1,
             end: 'latest',
@@ -792,7 +792,7 @@ export function useManualTrade() {
                     };
                     setNotifications(p => [...p, notif]);
                     setTimeout(() => setNotifications(p => p.filter(n => n.key !== notif.key)), 3000);
-                    sendViaNewSystem({ proposal_open_contract: 1, contract_id: contractId, subscribe: 1 });
+        const sent = sendViaNewSystem({
                 } else {
                     setBuyResult({
                         contract_id: contractId,
