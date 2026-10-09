@@ -36,21 +36,6 @@ import {
     LabelPairedPlayLgFillIcon,
     LabelPairedPuzzlePieceTwoCaptionBoldIcon,
 } from '@deriv/quill-icons/LabelPaired';
-                            <div
-                                label={
-                                    <>
-                                        <LabelPairedPlayLgFillIcon
-                                            height='24px'
-                                            width='24px'
-                                            fill='var(--text-general)'
-                                        />
-                                        <Localize i18n_default_text='Manual Trade' />
-                                    </>
-                                }
-                                id='id-manual-trade'
-                            >
-                                <ManualTrade />
-                            </div>
 import { LegacyGuide1pxIcon } from '@deriv/quill-icons/Legacy';
 import { Localize, localize } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
@@ -60,8 +45,6 @@ import Dashboard from '../dashboard';
 import RunStrategy from '../dashboard/run-strategy';
 import ManualTrade from '../manual-trade';
 import TradingViewComponent from '@/components/trading-view-chart/trading-view';
-import TradingViewTrading from '@/components/trading-view-chart/trading-view-trading';
-import Analysis from '../analysis/analysis';
 import './main.scss';
 
 const ChartWrapper = lazy(() => import('../chart/chart-wrapper'));
@@ -515,11 +498,32 @@ const AppWrapper = observer(() => {
                                         <Localize i18n_default_text='Manual Trader' />
                                     </>
                                 }
-                                id='id-manual-trader'
+                                id='id-manual-trade'
                             >
                                 <Suspense fallback={<ChunkLoader message={localize('Loading manual trader...')} />}>
                                     <ManualTrade />
                                 </Suspense>
+                            </div>
+                            <div
+                                label={
+                                    <>
+                                        <span className='tab-icon-3d tab-icon-3d--trading-view'>
+                                            <LabelPairedChartLineCaptionRegularIcon
+                                                height='18px'
+                                                width='18px'
+                                                fill='white'
+                                            />
+                                        </span>
+                                        <Localize i18n_default_text='Trading View' />
+                                    </>
+                                }
+                                id='id-trading-view'
+                            >
+                                <div style={{ height: 'calc(100vh - 12rem)', display: 'flex', flexDirection: 'column' }}>
+                                    <Suspense fallback={<ChunkLoader message={localize('Loading Trading View...')} />}>
+                                        <TradingViewComponent />
+                                    </Suspense>
+                                </div>
                             </div>
                         </Tabs>
                         {!isDesktop && right_tab_shadow && <span className='tabs-shadow tabs-shadow--right' />}{' '}
