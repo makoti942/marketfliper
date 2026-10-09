@@ -614,5 +614,241 @@ export function useManualTrade() {
             req_id: subId,
         });
         if (sent) lastTickTimeRef.current = Date.now();
-    }
     }, []);
+
+    useEffect(() => {
+        lastTickTimeRef.current = Date.now();
+        if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+        heartbeatRef.current = setInterval(() => {
+            if (!mountedRef.current) return;
+            const elapsed = Date.now() - lastTickTimeRef.current;
+            if (elapsed > 8000) {
+                resubscribeTicks();
+            }
+        }, 5000);
+        return () => { if (heartbeatRef.current) clearInterval(heartbeatRef.current); };
+    }, [activeSymbol, resubscribeTicks]);
+
+    // Reconnect: when WS comes back online, resubscribe ticks
+    useEffect(() => {
+        const check = setInterval(() => {
+            if (window._newSystemWS?.readyState === WebSocket.OPEN && mountedRef.current) {
+                const elapsed = Date.now() - lastTickTimeRef.current;
+                if (elapsed > 8000) {
+                    resubscribeTicks();
+                }
+            }
+        }, 3000);
+        return () => clearInterval(check);
+    }, [resubscribeTicks]);
+
+    // The bulk seed may land before active_symbols delivers the real pip size —
+    // recompute stats whenever it changes so digits are never mis-parsed.
+    useEffect(() => {
+        if (pricesRef.current.length === 0) return;
+        const stats = computeDigitGrowth(pricesRef.current, pipSize);
+        setDigitCounts(stats.counts);
+        setDigitGrowth(stats.growth);
+        setDigitTotal(stats.total);
+    }, [pipSize]);
+
+    const setTradeType = useCallback((type: TradeType) => {
+        setTradeTypeState(type);
+        switch (type) {
+            case 'matches-differs': setContractMode('DIGITMATCH'); break;
+            case 'over-under': setContractMode('DIGITOVER'); break;
+            case 'even-odd': setContractMode('DIGITEVEN'); break;
+        }
+    }, []);
+
+    // One-click execution: Deriv accepts buy(parameters) directly. Avoid the
+    // old proposal -> buy round trip because it added a visible delay after
+    // the user pressed the execution button.
+    const cancelEntryWait = useCallback(() => {
+        cancelEntryRef.current = true;
+    }, []);
+
+    const buyWithMode = useCallback(async (mode: ContractMode) => {
+        if (isBuyingRef.current) return;
+        const amount = parseFloat(stake);
+        if (!amount || amount <= 0 || !duration) {
+            setBuyError('Enter a valid stake and duration first.');
+            return;
+        }
+        isBuyingRef.current = true;
+        setIsBuying(true);
+        setBuyError(null);
+
+        if (entryEnabledRef.current) {
+            const targetDigit = entryDigitRef.current;
+            cancelEntryRef.current = false;
+            setIsWaitingEntry(true);
+            while (lastDigitRef.current !== targetDigit) {
+                if (cancelEntryRef.current) {
+                    isBuyingRef.current = false;
+                    if (mountedRef.current) { setIsBuying(false); setIsWaitingEntry(false); }
+                    setBuyError('Trade cancelled — waiting for entry digit.');
+                    return;
+                }
+                await new Promise(r => setTimeout(r, 100));
+            }
+            if (mountedRef.current) setIsWaitingEntry(false);
+        }
+
+        // Sandbox mode: execute locally, don't send to Deriv
+        // Use ref because isSandbox is not in this callback's dependency array
+        if (isSandboxRef.current) {
+            const trade = executeSandboxTrade({
+                symbol: activeSymbol,
+                contractType: mode,
+                barrier: mode !== 'DIGITEVEN' && mode !== 'DIGITODD' ? selectedDigit : 0,
+                stake: amount,
+                duration,
+                entryDigit: lastDigitRef.current ?? 0,
+            });
+            if (trade) {
+                setBuyResult({
+                    contract_id: trade.contractId,
+                    buyPrice: trade.stake,
+                    payout: trade.payout,
+                    balanceAfter: 0,
+                });
+                setBuyError(null);
+                setActiveTrade({
+                    contractId: trade.contractId,
+                    contractType: mode,
+                    selectedDigit,
+                    stake: trade.stake,
+                    openedAt: trade.openedAt,
+                });
+                        setTradeHistory(previous => [...previous, {
+                            contractId: trade.contractId,
+                            symbol: activeSymbol,
+                    contractType: mode,
+                    stake: trade.stake,
+                    profit: null,
+                            status: 'open',
+                            executedAt: trade.openedAt,
+                            entryDigit: trade.entryDigit,
+                        }]);
+            } else {
+                setBuyError('Sandbox: insufficient balance or trade already open.');
+            }
+            isBuyingRef.current = false;
+            if (mountedRef.current) setIsBuying(false);
+            return;
+        }
+
+        try {
+            const params: any = {
+                amount,
+                basis: 'stake',
+                contract_type: mode,
+                currency: 'USD',
+                duration,
+                duration_unit: 't',
+                symbol: activeSymbol,
+            };
+            if (mode !== 'DIGITEVEN' && mode !== 'DIGITODD') params.barrier = selectedDigit;
+
+            const buyReqId = ++reqIdRef.current;
+            buyHandledByWsRef.current = false;
+            pendingBuyModeRef.current = mode;
+            const buyRes: any = await sendViaNewSystemWithPromise({ buy: 1, price: amount, parameters: params, req_id: buyReqId });
+            if (buyRes?.buy) {
+                const contractId = Number(buyRes.buy.contract_id);
+                if (!buyHandledByWsRef.current) {
+                    trackedContractsRef.current.add(String(contractId));
+                    setBuyResult({
+                        contract_id: contractId,
+                        buyPrice: Number(buyRes.buy.buy_price),
+                        payout: Number(buyRes.buy.payout),
+                        balanceAfter: Number(buyRes.buy.balance_after),
+                    });
+                    setBuyError(null);
+                    setActiveTrade({
+                        contractId,
+                        contractType: mode,
+                        selectedDigit,
+                        stake: Number(buyRes.buy.buy_price),
+                        openedAt: Date.now(),
+                    });
+                    setTradeHistory(previous => [...previous, {
+                        contractId,
+                        symbol: activeSymbol,
+                        contractType: mode,
+                        stake: Number(buyRes.buy.buy_price),
+                        profit: null,
+                        status: 'open',
+                        executedAt: Date.now(),
+                    }]);
+                    const notif: TradeNotification = {
+                        type: 'opened',
+                        contractId,
+                        contractType: mode,
+                        stake: Number(buyRes.buy.buy_price),
+                        payout: Number(buyRes.buy.payout),
+                        key: Date.now(),
+                    };
+                    setNotifications(p => [...p, notif]);
+                    setTimeout(() => setNotifications(p => p.filter(n => n.key !== notif.key)), 3000);
+                    sendViaNewSystem({ proposal_open_contract: 1, contract_id: contractId, subscribe: 1 });
+                } else {
+                    setBuyResult({
+                        contract_id: contractId,
+                        buyPrice: Number(buyRes.buy.buy_price),
+                        payout: Number(buyRes.buy.payout),
+                        balanceAfter: Number(buyRes.buy.balance_after),
+                    });
+                    setActiveTrade({
+                        contractId,
+                        contractType: mode,
+                        selectedDigit,
+                        stake: Number(buyRes.buy.buy_price),
+                        openedAt: Date.now(),
+                    });
+                }
+            } else {
+                throw new Error(buyRes?.error?.message ?? 'Buy failed.');
+            }
+        } catch (e: any) {
+            if (buyHandledByWsRef.current) {
+                isBuyingRef.current = false;
+                if (mountedRef.current) setIsBuying(false);
+                return;
+            }
+            const msg = e?.error?.message ?? e?.message ?? 'Trade failed.';
+            setBuyError(msg);
+            const errNotif: TradeNotification = { type: 'error', message: msg, key: Date.now() };
+            setNotifications(p => [...p, errNotif]);
+            setTimeout(() => setNotifications(p => p.filter(n => n.key !== errNotif.key)), 3000);
+        } finally {
+            isBuyingRef.current = false;
+            if (mountedRef.current) setIsBuying(false);
+        }
+    }, [stake, duration, activeSymbol, selectedDigit]);
+
+    const clearBuyResult = useCallback(() => {
+        setBuyResult(null);
+        setBuyError(null);
+    }, []);
+
+    const clearTradeHistory = useCallback(() => {
+        setTradeHistory([]);
+        try { sessionStorage.removeItem(SESSION_TRADES_KEY); } catch {}
+    }, []);
+
+    return {
+        symbols, activeSymbol, setActiveSymbol,
+        currentTick, lastDigit, digitCounts, digitGrowth, digitTotal, pipSize,
+        tradeType, setTradeType,
+        contractMode, setContractMode,
+        selectedDigit, setSelectedDigit,
+        stake, setStake, duration, setDuration,
+        buyWithMode, isBuying, buyResult, buyError, clearBuyResult,
+        isConnected, isLoading, tradeFlash,
+        notifications, exitDigit, activeTrade, tradeHistory, clearTradeHistory,
+        entryDigitEnabled, setEntryDigitEnabled, entryDigitValue, setEntryDigitValue,
+        entryTimeout, setEntryTimeout, isWaitingEntry, cancelEntryWait,
+    };
+}
