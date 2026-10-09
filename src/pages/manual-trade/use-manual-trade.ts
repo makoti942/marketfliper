@@ -596,7 +596,6 @@ export function useManualTrade() {
     }, [activeSymbol]);
 
     // Heartbeat: detect stale ticks and resubscribe
-    // Heartbeat: detect stale ticks and resubscribe
     const resubscribeTicks = useCallback(() => {
         if (!symbolRef.current) return;
         if (subIdRef.current) {
