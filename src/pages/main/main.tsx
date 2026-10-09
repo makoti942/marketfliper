@@ -506,7 +506,7 @@ const AppWrapper = observer(() => {
                                 id='id-manual-trader'
                             >
                                 <Suspense fallback={<ChunkLoader message={localize('Loading manual trader...')} />}>
-                                    <ManualTrader />
+                                    <ManualTrade />
                                 </Suspense>
                             </div>
                         </Tabs>
