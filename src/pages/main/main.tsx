@@ -146,7 +146,7 @@ const AppWrapper = observer(() => {
     const GetHashedValue = (tab: number) => {
         tab_value = location.hash?.split('#')[1];
         if (!tab_value) return is_preview_mode ? BOT_BUILDER : tab;
-        return Number(hash.indexOf(String(tab_value)));
+        return Number(hash.indexOf ? hash.indexOf(String(tab_value)) : TAB_IDS.indexOf('id-' + tab_value))
     };
     const active_hash_tab = GetHashedValue(active_tab);
 
