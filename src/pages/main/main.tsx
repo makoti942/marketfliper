@@ -143,6 +143,7 @@ const AppWrapper = observer(() => {
     // default (instead of the dashboard) when no explicit #tab hash is present.
     const is_preview_mode = window.location.pathname.includes('/preview');
     let tab_value: number | string = active_tab;
+    const hash = TAB_IDS;
     const GetHashedValue = (tab: number) => {
         tab_value = location.hash?.split('#')[1];
         if (!tab_value) return is_preview_mode ? BOT_BUILDER : tab;
