@@ -1,5 +1,4 @@
-import { getAppId, getSocketURL } from '@/components/shared';
-import { onNewSystemMessage, isNewLoggedIn } from '@/auth/NewDerivAuth';
+import { onNewSystemMessage } from '@/auth/NewDerivAuth';
 
 export const ALL_SYMBOLS = [
     'R_10', 'R_25', 'R_50', 'R_75', 'R_100',

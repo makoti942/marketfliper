@@ -91,6 +91,7 @@ interface PickerBuilder {
 declare global {
     interface Window {
         __webpack_public_path__: string;
+        _newSystemWS?: WebSocket;
         Analytics: unknown;
         DD_RUM: object | undefined;
         GrowthbookFeatures: { [key: string]: boolean };
