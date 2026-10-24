@@ -42,6 +42,7 @@ import { useDevice } from '@deriv-com/ui';
 import RunPanel from '../../components/run-panel';
 import ChartModal from '../chart/chart-modal';
 import Dashboard from '../dashboard';
+import DTrader from '../dtrader/dtrader';
 import RunStrategy from '../dashboard/run-strategy';
 import ManualTrade from '../manual-trade';
 import TradingViewComponent from '@/components/trading-view-chart/trading-view';
@@ -382,148 +383,38 @@ const AppWrapper = observer(() => {
                         {!isDesktop && left_tab_shadow && <span className='tabs-shadow tabs-shadow--left' />}{' '}
                         <Tabs active_index={active_tab} className='main__tabs' onTabItemClick={handleTabChange} top>
                             <div
-                                label={
-                                    <>
-                                        <span className='tab-icon-3d tab-icon-3d--dashboard'>
-                                            <LabelPairedObjectsColumnCaptionRegularIcon
-                                                height='18px'
-                                                width='18px'
-                                                fill='white'
-                                            />
-                                        </span>
-                                        <Localize i18n_default_text='Dashboard' />
-                                    </>
-                                }
+                                label={<><span className='tab-icon-3d tab-icon-3d--dashboard'><LabelPairedObjectsColumnCaptionRegularIcon height='18px' width='18px' fill='white' /></span><Localize i18n_default_text='Dashboard' /></>}
                                 id='id-dbot-dashboard'
                             >
                                 <Dashboard handleTabChange={handleTabChange} />
                             </div>
                             <div
-                                label={
-                                    <>
-                                        <span className='tab-icon-3d tab-icon-3d--bot-builder'>
-                                            <LabelPairedPuzzlePieceTwoCaptionBoldIcon
-                                                height='18px'
-                                                width='18px'
-                                                fill='white'
-                                            />
-                                        </span>
-                                        <Localize i18n_default_text='Bot Builder' />
-                                    </>
-                                }
+                                label={<><span className='tab-icon-3d tab-icon-3d--free-bots'><LabelPairedPuzzlePieceTwoCaptionBoldIcon height='18px' width='18px' fill='white' /></span><Localize i18n_default_text='Free Bots' /></>}
+                                id='id-trading-bots'
+                            >
+                                <Suspense fallback={<ChunkLoader message={localize('Loading free bots...')} />}><FreeBots /></Suspense>
+                            </div>
+                            <div
+                                label={<><span className='tab-icon-3d tab-icon-3d--dtrader'><LabelPairedChartLineCaptionRegularIcon height='18px' width='18px' fill='white' /></span><Localize i18n_default_text='DTrader' /></>}
+                                id='id-dtrader'
+                            >
+                                <DTrader />
+                            </div>
+                            <div
+                                label={<><span className='tab-icon-3d tab-icon-3d--analysis'><LabelPairedSearchLgRegularIcon height='18px' width='18px' fill='white' /></span><Localize i18n_default_text='Analysis Tool' /></>}
+                                id='id-super-analysis'
+                            >
+                                <Suspense fallback={<ChunkLoader message={localize('Loading analysis tool...')} />}><ManualTrade /></Suspense>
+                            </div>
+                            <div
+                                label={<><span className='tab-icon-3d tab-icon-3d--bot-builder'><LabelPairedPuzzlePieceTwoCaptionBoldIcon height='18px' width='18px' fill='white' /></span><Localize i18n_default_text='Bot Builder' /></>}
                                 id='id-bot-builder'
                             />
                             <div
-                                label={
-                                    <>
-                                        <span className='tab-icon-3d tab-icon-3d--charts'>
-                                            <LabelPairedChartLineCaptionRegularIcon
-                                                height='18px'
-                                                width='18px'
-                                                fill='white'
-                                            />
-                                        </span>
-                                        <Localize i18n_default_text='Charts' />
-                                    </>
-                                }
-                                id={
-                                    is_chart_modal_visible || is_trading_view_modal_visible
-                                        ? 'id-charts--disabled'
-                                        : 'id-charts'
-                                }
+                                label={<><span className='tab-icon-3d tab-icon-3d--charts'><LabelPairedChartLineCaptionRegularIcon height='18px' width='18px' fill='white' /></span><Localize i18n_default_text='Charts' /></>}
+                                id={is_chart_modal_visible || is_trading_view_modal_visible ? 'id-charts--disabled' : 'id-charts'}
                             >
-                                <Suspense
-                                    fallback={<ChunkLoader message={localize('Please wait, loading chart...')} />}
-                                >
-                                    <ChartWrapper show_digits_stats={false} />
-                                </Suspense>
-                            </div>
-                            <div
-                                label={
-                                    <>
-                                        <span className='tab-icon-3d tab-icon-3d--free-bots'>
-                                            <LabelPairedPuzzlePieceTwoCaptionBoldIcon
-                                                height='18px'
-                                                width='18px'
-                                                fill='white'
-                                            />
-                                        </span>
-                                        <Localize i18n_default_text='Free Bots' />
-                                    </>
-                                }
-                                id='id-trading-bots'
-                            >
-                                <Suspense
-                                    fallback={<ChunkLoader message={localize('Loading free bots...')} />}
-                                >
-                                    <FreeBots />
-                                </Suspense>
-                            </div>
-                            <div
-                                label={
-                                    <>
-                                        <span className='tab-icon-3d tab-icon-3d--tutorials'>
-                                            <LegacyGuide1pxIcon
-                                                height='14px'
-                                                width='14px'
-                                                fill='#422006'
-                                                className='icon-general-fill-g-path'
-                                            />
-                                        </span>
-                                        <Localize i18n_default_text='Tutorials' />
-                                    </>
-                                }
-                                id='id-tutorials'
-                            >
-                                <div className='tutorials-wrapper'>
-                                    <Suspense
-                                        fallback={
-                                            <ChunkLoader message={localize('Please wait, loading tutorials...')} />
-                                        }
-                                    >
-                                        <Tutorial handleTabChange={handleTabChange} />
-                                    </Suspense>
-                                </div>
-                            </div>
-                            <div
-                                label={
-                                    <>
-                                        <span className='tab-icon-3d tab-icon-3d--manual-trade'>
-                                            <LabelPairedChartLineCaptionRegularIcon
-                                                height='18px'
-                                                width='18px'
-                                                fill='white'
-                                            />
-                                        </span>
-                                        <Localize i18n_default_text='Manual Trader' />
-                                    </>
-                                }
-                                id='id-manual-trade'
-                            >
-                                <Suspense fallback={<ChunkLoader message={localize('Loading manual trader...')} />}>
-                                    <ManualTrade />
-                                </Suspense>
-                            </div>
-                            <div
-                                label={
-                                    <>
-                                        <span className='tab-icon-3d tab-icon-3d--trading-view'>
-                                            <LabelPairedChartLineCaptionRegularIcon
-                                                height='18px'
-                                                width='18px'
-                                                fill='white'
-                                            />
-                                        </span>
-                                        <Localize i18n_default_text='Trading View' />
-                                    </>
-                                }
-                                id='id-trading-view'
-                            >
-                                <div style={{ height: 'calc(100vh - 12rem)', display: 'flex', flexDirection: 'column' }}>
-                                    <Suspense fallback={<ChunkLoader message={localize('Loading Trading View...')} />}>
-                                        <TradingViewComponent />
-                                    </Suspense>
-                                </div>
+                                <Suspense fallback={<ChunkLoader message={localize('Please wait, loading chart...')} />}><ChartWrapper show_digits_stats={false} /></Suspense>
                             </div>
                         </Tabs>
                         {!isDesktop && right_tab_shadow && <span className='tabs-shadow tabs-shadow--right' />}{' '}

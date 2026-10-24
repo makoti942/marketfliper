@@ -35,27 +35,26 @@
     --text-align-right: right;
     --text-align-center: center;
 
-
     /* Brand colors - dynamically generated from brand.config.json */
-    --brand-white: #ffffff;
-    --brand-dark-grey: #0a0a1a;
-    --brand-red-coral: #00d4ff; /* legacy compatibility */
-    --brand-orange: #ff0080; /* legacy compatibility */
+    --brand-white: #F2FFD4;
+    --brand-dark-grey: #030303;
+    --brand-red-coral: #9ACD32; /* legacy compatibility */
+    --brand-orange: #F2FFD4; /* legacy compatibility */
 
     /* Dynamic brand colors (set by brand configuration) */
-    --brand-primary: #00d4ff;
-    --brand-secondary: #7b2ff7;
-    --brand-tertiary: #ff0080;
-    --brand-success: #10b981;
-    --brand-danger: #ef4444;
-    --brand-warning: #f59e0b;
-    --brand-info: #0ea5e9;
-    --brand-neutral: #6b7280;
+    --brand-primary: #9ACD32;
+    --brand-secondary: #7BAE20;
+    --brand-tertiary: #F2FFD4;
+    --brand-success: #9ACD32;
+    --brand-danger: #FF3B30;
+    --brand-warning: #F2C94C;
+    --brand-info: #7BAE20;
+    --brand-neutral: #6E765A;
 
     /* Brand typography - dynamically generated from brand.config.json */
     --brand-font-primary: Inter, sans-serif;
-    --brand-font-secondary: 'Space Grotesk', sans-serif;
-    --brand-font-monospace: 'Courier New', Courier, monospace;
+    --brand-font-secondary: Rajdhani, sans-serif;
+    --brand-font-monospace: JetBrains Mono, monospace;
     /* [/AI] */
 
     // App Cards gradient background
