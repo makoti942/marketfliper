@@ -51,6 +51,7 @@ import './main.scss';
 
 const ChartWrapper = lazy(() => import('../chart/chart-wrapper'));
 const FreeBots = lazy(() => import('../free-bots/free-bots'));
+const WorkspaceTools = lazy(() => import('../workspace-tools/workspace-tools'));
 const Tutorial = lazy(() => import('../tutorials'));
 
 const AppWrapper = observer(() => {
@@ -82,7 +83,28 @@ const AppWrapper = observer(() => {
         [key: string]: string;
     };
     const { clear } = summary_card;
-    const { DASHBOARD, BOT_BUILDER, TRADING_BOTS, ANALYSIS, MANUAL_TRADE, COPY_TRADING, BOT_EXTRACTOR } = DBOT_TABS;
+    const {
+        DASHBOARD,
+        BOT_BUILDER,
+        TRADING_BOTS,
+        ANALYSIS,
+        MANUAL_TRADE,
+        COPY_TRADING,
+        BOT_EXTRACTOR,
+        VOLT_AI,
+        BULK_TRADER,
+        HEDGING_TOOL,
+        AUTO_TRADING,
+        TRADE_TYPES,
+        AI_BOTS,
+        QUICK_BOT,
+        SIGNALAI,
+        COPY_TRADER,
+        SPEEDBOT,
+        AUTOMATED,
+        SMART_RECOVERY_AI,
+        CHRISTMAS_GIFT,
+    } = DBOT_TABS;
     const init_render = React.useRef(true);
     const { isDesktop } = useDevice();
     const location = useLocation();
@@ -424,6 +446,29 @@ const AppWrapper = observer(() => {
                             >
                                 <Suspense fallback={<ChunkLoader message={localize('Please wait, loading chart...')} />}><ChartWrapper show_digits_stats={false} /></Suspense>
                             </div>
+                            {[
+                                [VOLT_AI, 'Volt AI', 'id-volt-ai'],
+                                [BULK_TRADER, 'Bulk Trader', 'id-bulk-trader'],
+                                [HEDGING_TOOL, 'Hedging Tool', 'id-hedging-tool'],
+                                [AUTO_TRADING, 'Auto Trading', 'id-auto-trading'],
+                                [TRADE_TYPES, 'Trade Types', 'id-trade-types'],
+                                [AI_BOTS, 'AI Bots', 'id-ai-bots'],
+                                [QUICK_BOT, 'Quick Bot', 'id-quick-bot'],
+                                [SIGNALAI, 'Signal AI', 'id-signal-ai'],
+                                [COPY_TRADER, 'Copy Trader', 'id-copy-trader'],
+                                [SPEEDBOT, 'Speedbot', 'id-speedbot'],
+                                [AUTOMATED, 'Automated', 'id-automated'],
+                                [SMART_RECOVERY_AI, 'Smart Recovery AI', 'id-smart-recovery-ai'],
+                                [CHRISTMAS_GIFT, 'Trader Challenge', 'id-christmas-gift'],
+                            ].map(([tab, label, id]) => (
+                                <div
+                                    key={id}
+                                    label={<><span className='tab-icon-3d tab-icon-3d--workspace-tool'><LabelPairedPuzzlePieceTwoCaptionBoldIcon height='18px' width='18px' fill='white' /></span>{label}</>}
+                                    id={id}
+                                >
+                                    <Suspense fallback={<ChunkLoader message={localize(`Loading ${label}...`)} />}><WorkspaceTools /></Suspense>
+                                </div>
+                            ))}
                         </Tabs>
                         {!isDesktop && right_tab_shadow && <span className='tabs-shadow tabs-shadow--right' />}{' '}
                     </div>
