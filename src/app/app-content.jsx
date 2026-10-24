@@ -142,9 +142,14 @@ const AppContent = observer(() => {
         const retrieveActiveSymbols = () => {
             const { active_symbols } = ApiHelpers.instance;
 
-            active_symbols.retrieveActiveSymbols(true).then(() => {
-                setIsLoading(false);
-            });
+            active_symbols
+                .retrieveActiveSymbols(true)
+                .catch(error => {
+                    console.error('Unable to initialise active symbols:', error);
+                })
+                .finally(() => {
+                    setIsLoading(false);
+                });
         };
 
         if (ApiHelpers?.instance?.active_symbols) {

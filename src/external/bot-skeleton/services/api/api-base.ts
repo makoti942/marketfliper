@@ -440,6 +440,9 @@ class APIBase {
             return this.active_symbols;
         } catch (error) {
             console.error('Failed to fetch and process active symbols:', error);
+            // Do not keep a rejected promise cached; a later reconnect must be
+            // able to issue a fresh request on the new websocket instance.
+            this.active_symbols_promise = null;
             throw error;
         }
     };

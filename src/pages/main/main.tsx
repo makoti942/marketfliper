@@ -152,6 +152,8 @@ const AppWrapper = observer(() => {
         const el_dashboard = document.getElementById('id-dbot-dashboard');
         const el_tutorial = document.getElementById('id-tutorials');
 
+        if (!el_dashboard || !el_tutorial || typeof window.IntersectionObserver === 'undefined') return;
+
         const observer_dashboard = new window.IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
@@ -181,7 +183,12 @@ const AppWrapper = observer(() => {
         );
         observer_dashboard.observe(el_dashboard);
         observer_tutorial.observe(el_tutorial);
-    });
+
+        return () => {
+            observer_dashboard.disconnect();
+            observer_tutorial.disconnect();
+        };
+    }, []);
 
     React.useEffect(() => {
         if (connectionStatus !== CONNECTION_STATUS.OPENED) {
