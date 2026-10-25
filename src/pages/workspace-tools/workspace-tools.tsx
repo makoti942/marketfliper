@@ -211,6 +211,34 @@ const WorkspaceTools = observer(() => {
         else if (action.toLowerCase().includes('run') || action.toLowerCase().includes('start') || action.toLowerCase().includes('scan')) setIsRunning(true);
     };
 
+    const renderToolContent = () => {
+        if (tool.id === 'signal-ai' || tool.id === 'volt-ai') {
+            return <div className='workspace-tools__signals'>{signalRows.map(([market, signal, confidence, age]) => <div className='workspace-tools__signal-row' key={market}><span className='workspace-tools__signal-symbol'>{market}</span><span>{signal}</span><b>{confidence}</b><small>{age}</small></div>)}</div>;
+        }
+        if (tool.id === 'bulk-trader' || tool.id === 'copy-trader') {
+            return <div className='workspace-tools__account-list'>{['VRTC••••21', 'VRTC••••48', 'VRTC••••73'].map((account, index) => <div className='workspace-tools__account-row' key={account}><span className='workspace-tools__account-avatar'>{index + 1}</span><div><b>{account}</b><small>{index === 0 ? 'Primary demo account' : 'Connected demo account'}</small></div><strong>{index === 0 ? 'LEAD' : 'READY'}</strong></div>)}</div>;
+        }
+        if (tool.id === 'hedging') {
+            return <div className='workspace-tools__exposure'><div className='workspace-tools__exposure-ring'><strong>1.00</strong><small>balanced</small></div><div className='workspace-tools__exposure-bars'><div><span>Primary position</span><i style={{ width: '72%' }} /></div><div><span>Hedge position</span><i style={{ width: '68%' }} /></div><small>Estimated exposure after hedge: 4.2%</small></div></div>;
+        }
+        if (tool.id === 'auto-trading' || tool.id === 'automated' || tool.id === 'speedbot') {
+            return <div className='workspace-tools__automation'><div className='workspace-tools__automation-state'><span className='workspace-tools__automation-orb' /><div><b>{isRunning ? 'Workflow running' : 'Workflow paused'}</b><small>Guardrails and stop conditions are active</small></div><strong>{isRunning ? 'ON' : 'OFF'}</strong></div><div className='workspace-tools__automation-steps'><span>ENTRY <b>READY</b></span><span>RISK <b>LOCKED</b></span><span>EXIT <b>READY</b></span></div></div>;
+        }
+        if (tool.id === 'trade-types') {
+            return <div className='workspace-tools__contract-grid'>{[['Rise / Fall', 'CALL / PUT'], ['Over / Under', 'DIGITOVER'], ['Even / Odd', 'DIGITEVEN'], ['Matches / Differs', 'DIGITMATCH']].map(([title, code]) => <button type='button' key={code} onClick={() => setActiveAction(`${title} selected for review`)}><b>{title}</b><small>{code}</small></button>)}</div>;
+        }
+        if (tool.id === 'ai-bots' || tool.id === 'quick-bot') {
+            return <div className='workspace-tools__strategy-grid'>{[['Momentum Scout', 'Medium risk', '82%'], ['Digit Guard', 'Low risk', '76%'], ['Range Pilot', 'Medium risk', '69%']].map(([name, risk, score]) => <div className='workspace-tools__strategy-card' key={name}><span>{score}</span><b>{name}</b><small>{risk}</small><button type='button' onClick={() => runAction('Use template')}>Preview →</button></div>)}</div>;
+        }
+        if (tool.id === 'smart-recovery') {
+            return <div className='workspace-tools__guardrails'>{[['Maximum recovery steps', '2'], ['Daily loss limit', '5.00 USD'], ['Stake escalation', 'Locked']].map(([label, value]) => <div key={label}><span>{label}</span><b>{value}</b></div>)}<small>Recovery cannot increase exposure without a new review.</small></div>;
+        }
+        if (tool.id === 'christmas-gift') {
+            return <div className='workspace-tools__challenge'><div className='workspace-tools__challenge-progress'><span style={{ width: '62%' }} /></div><strong>62% complete</strong><p>Complete the live-analysis guide and review two demo strategies to unlock the next milestone.</p><button type='button' onClick={() => runAction('Continue challenge')}>Continue challenge →</button></div>;
+        }
+        return <div className='workspace-tools__workflow'>{['Choose market and contract', 'Set risk guardrails', 'Review simulated outcome'].map((step, index) => <div className={`workspace-tools__step ${index === 1 ? 'workspace-tools__step--current' : ''}`} key={step}><span>{String(index + 1).padStart(2, '0')}</span><div><b>{step}</b><small>{index === 1 ? 'Current workspace step' : 'Ready for review'}</small></div><i>{index < 1 ? '✓' : '•'}</i></div>)}</div>;
+    };
+
     return (
         <section className='workspace-tools' style={{ '--tool-accent': tool.accent } as React.CSSProperties}>
             <div className='workspace-tools__ambient workspace-tools__ambient--one' />
@@ -234,13 +262,7 @@ const WorkspaceTools = observer(() => {
                 <div className='workspace-tools__grid'>
                     <div className='workspace-tools__panel workspace-tools__panel--primary'>
                         <div className='workspace-tools__panel-heading'><div><span className='workspace-tools__panel-kicker'>WORKSPACE PREVIEW</span><h2>{tool.title} control surface</h2></div><span className='workspace-tools__live-dot'>LIVE PREVIEW</span></div>
-                        {tool.id === 'signal-ai' || tool.id === 'volt-ai' ? (
-                            <div className='workspace-tools__signals'>{signalRows.map(([market, signal, confidence, age]) => <div className='workspace-tools__signal-row' key={market}><span className='workspace-tools__signal-symbol'>{market}</span><span>{signal}</span><b>{confidence}</b><small>{age}</small></div>)}</div>
-                        ) : (
-                            <div className='workspace-tools__workflow'>
-                                {['Choose market and contract', 'Set risk guardrails', 'Review simulated outcome'].map((step, index) => <div className={`workspace-tools__step ${index === 1 ? 'workspace-tools__step--current' : ''}`} key={step}><span>{String(index + 1).padStart(2, '0')}</span><div><b>{step}</b><small>{index === 1 ? 'Current workspace step' : 'Ready for review'}</small></div><i>{index < 1 ? '✓' : '•'}</i></div>)}
-                            </div>
-                        )}
+                        {renderToolContent()}
                         <div className='workspace-tools__chart-line'><span /><span /><span /><span /><span /><span /><span /><span /></div>
                     </div>
                     <aside className='workspace-tools__panel workspace-tools__panel--side'>

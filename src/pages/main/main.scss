@@ -118,6 +118,11 @@
                 background: var(--general-section-1);
                 justify-content: start;
 
+                .dc-themed-scrollbars-wrapper {
+                    max-width: 100%;
+                    min-width: 0;
+                }
+
                 @include mobile-or-tablet-screen {
                     overflow-x: auto;
                     overflow-y: hidden;

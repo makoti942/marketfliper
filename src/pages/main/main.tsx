@@ -411,7 +411,15 @@ const AppWrapper = observer(() => {
                 >
                     <div>
                         {!isDesktop && left_tab_shadow && <span className='tabs-shadow tabs-shadow--left' />}{' '}
-                        <Tabs active_index={active_tab} className='main__tabs' onTabItemClick={handleTabChange} top>
+                        <Tabs
+                            active_index={active_tab}
+                            className='main__tabs'
+                            onTabItemClick={handleTabChange}
+                            top
+                            is_scrollable
+                            header_fit_content
+                            is_overflow_hidden
+                        >
                             <div
                                 label={<><span className='tab-icon-3d tab-icon-3d--dashboard'><LabelPairedObjectsColumnCaptionRegularIcon height='18px' width='18px' fill='white' /></span><Localize i18n_default_text='Dashboard' /></>}
                                 id='id-dbot-dashboard'
