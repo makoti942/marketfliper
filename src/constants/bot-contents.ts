@@ -8,7 +8,7 @@ export const tabs_title: TTabsTitle = Object.freeze({
     WORKSPACE: 'Workspace',
     CHART: 'Chart',
 });
-/** Market Flipper tab order mirrors DeriMind Hub while preserving the existing bot logic. */
+
 export const DBOT_TABS: TDashboardTabIndex = Object.freeze({
     DASHBOARD: 0,
     TRADING_BOTS: 1,
@@ -24,15 +24,10 @@ export const DBOT_TABS: TDashboardTabIndex = Object.freeze({
     HEDGING_TOOL: 8,
     AUTO_TRADING: 9,
     TRADE_TYPES: 10,
-    AI_BOTS: 11,
-    QUICK_BOT: 12,
-    SIGNALAI: 13,
-    COPY_TRADER: 14,
-    SPEEDBOT: 15,
-    AUTOMATED: 16,
-    SMART_RECOVERY_AI: 17,
-    CHRISTMAS_GIFT: 18,
+    SIGNALAI: 11,
+    COPY_TRADER: 12,
 });
+
 export const MAX_STRATEGIES = 10;
 export const TAB_IDS = [
     'id-dbot-dashboard',
@@ -46,13 +41,7 @@ export const TAB_IDS = [
     'id-hedging-tool',
     'id-auto-trading',
     'id-trade-types',
-    'id-ai-bots',
-    'id-quick-bot',
     'id-signal-ai',
     'id-copy-trader',
-    'id-speedbot',
-    'id-automated',
-    'id-smart-recovery-ai',
-    'id-christmas-gift',
 ];
 export const DEBOUNCE_INTERVAL_TIME = 500;

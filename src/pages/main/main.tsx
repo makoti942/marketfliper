@@ -96,14 +96,8 @@ const AppWrapper = observer(() => {
         HEDGING_TOOL,
         AUTO_TRADING,
         TRADE_TYPES,
-        AI_BOTS,
-        QUICK_BOT,
         SIGNALAI,
         COPY_TRADER,
-        SPEEDBOT,
-        AUTOMATED,
-        SMART_RECOVERY_AI,
-        CHRISTMAS_GIFT,
     } = DBOT_TABS;
     const init_render = React.useRef(true);
     const { isDesktop } = useDevice();
@@ -462,14 +456,8 @@ const AppWrapper = observer(() => {
                                 [HEDGING_TOOL, 'Hedging Tool', 'id-hedging-tool'],
                                 [AUTO_TRADING, 'Auto Trading', 'id-auto-trading'],
                                 [TRADE_TYPES, 'Trade Types', 'id-trade-types'],
-                                [AI_BOTS, 'AI Bots', 'id-ai-bots'],
-                                [QUICK_BOT, 'Quick Bot', 'id-quick-bot'],
                                 [SIGNALAI, 'Signal AI', 'id-signal-ai'],
                                 [COPY_TRADER, 'Copy Trader', 'id-copy-trader'],
-                                [SPEEDBOT, 'Speedbot', 'id-speedbot'],
-                                [AUTOMATED, 'Automated', 'id-automated'],
-                                [SMART_RECOVERY_AI, 'Smart Recovery AI', 'id-smart-recovery-ai'],
-                                [CHRISTMAS_GIFT, 'Trader Challenge', 'id-christmas-gift'],
                             ].map(([tab, label, id]) => (
                                 <div
                                     key={id}

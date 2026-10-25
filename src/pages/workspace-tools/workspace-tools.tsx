@@ -11,14 +11,9 @@ type ToolId =
     | 'hedging'
     | 'auto-trading'
     | 'trade-types'
-    | 'ai-bots'
-    | 'smart-recovery'
-    | 'christmas-gift'
-    | 'quick-bot'
     | 'signal-ai'
     | 'copy-trader'
-    | 'speedbot'
-    | 'automated';
+    ;
 
 type ToolConfig = {
     id: ToolId;
@@ -70,38 +65,6 @@ const TOOLS: Record<number, ToolConfig> = {
         accent: '#ff7b8d',
         icon: '⌁',
     },
-    [DBOT_TABS.AI_BOTS]: {
-        id: 'ai-bots',
-        title: 'AI Bots',
-        eyebrow: 'STRATEGY LAB',
-        description: 'Choose a strategy profile and inspect its signals, limits, and current state.',
-        accent: '#c084fc',
-        icon: '✦',
-    },
-    [DBOT_TABS.SMART_RECOVERY_AI]: {
-        id: 'smart-recovery',
-        title: 'Smart Recovery AI',
-        eyebrow: 'LOSS CONTROL',
-        description: 'Configure recovery guardrails without automatically increasing risk after a loss.',
-        accent: '#ff9c66',
-        icon: '↻',
-    },
-    [DBOT_TABS.CHRISTMAS_GIFT]: {
-        id: 'christmas-gift',
-        title: 'Trader Challenge',
-        eyebrow: 'COMMUNITY MILESTONE',
-        description: 'Track workspace milestones and unlock educational strategy challenges.',
-        accent: '#6ee7b7',
-        icon: '◆',
-    },
-    [DBOT_TABS.QUICK_BOT]: {
-        id: 'quick-bot',
-        title: 'Quick Bot',
-        eyebrow: 'FAST SETUP',
-        description: 'Start from a focused template and move directly into a reviewable bot workflow.',
-        accent: '#22d3ee',
-        icon: '➜',
-    },
     [DBOT_TABS.SIGNALAI]: {
         id: 'signal-ai',
         title: 'Signal AI',
@@ -118,22 +81,6 @@ const TOOLS: Record<number, ToolConfig> = {
         accent: '#60a5fa',
         icon: '⟲',
     },
-    [DBOT_TABS.SPEEDBOT]: {
-        id: 'speedbot',
-        title: 'Speedbot',
-        eyebrow: 'RAPID EXECUTION',
-        description: 'Tune timing and trade limits for a fast strategy while keeping the review step visible.',
-        accent: '#fb7185',
-        icon: '»',
-    },
-    [DBOT_TABS.AUTOMATED]: {
-        id: 'automated',
-        title: 'Automated',
-        eyebrow: 'WORKFLOW MONITOR',
-        description: 'Monitor all active automations, their health, and the next guarded action.',
-        accent: '#34d399',
-        icon: '▰',
-    },
 };
 
 const metricByTool: Record<ToolId, [string, string, string]> = {
@@ -142,30 +89,18 @@ const metricByTool: Record<ToolId, [string, string, string]> = {
     hedging: ['1.00', 'Exposure ratio', 'Balanced'],
     'auto-trading': ['04', 'Guardrails', 'Armed'],
     'trade-types': ['18', 'Contract types', 'Available'],
-    'ai-bots': ['07', 'Strategy profiles', 'Curated'],
-    'smart-recovery': ['0.00%', 'Extra risk', 'Locked'],
-    'christmas-gift': ['62%', 'Challenge progress', 'This month'],
-    'quick-bot': ['06', 'Quick templates', 'Ready'],
     'signal-ai': ['84%', 'Top confidence', 'Live'],
     'copy-trader': ['02', 'Linked accounts', 'Demo only'],
-    speedbot: ['250ms', 'Scan interval', 'Capped'],
-    automated: ['03', 'Active workflows', 'Healthy'],
 };
 
 const actionsByTool: Record<ToolId, string[]> = {
     'volt-ai': ['Scan market', 'Open chart', 'Save watchlist'],
     'bulk-trader': ['Review batch', 'Select accounts', 'Clear plan'],
     hedging: ['Calculate hedge', 'Open chart', 'Reset ratio'],
-    'auto-trading': ['Test workflow', 'Edit guardrails', 'Pause all'],
+    'auto-trading': ['Scan all volatilities', 'Review best market', 'Run guarded bot'],
     'trade-types': ['Open setup', 'Compare types', 'View guide'],
-    'ai-bots': ['Preview strategy', 'Run backtest', 'Open bot builder'],
-    'smart-recovery': ['Simulate recovery', 'Lock risk', 'View guide'],
-    'christmas-gift': ['Continue challenge', 'View rewards', 'Open tutorials'],
-    'quick-bot': ['Use template', 'Preview blocks', 'Open builder'],
-    'signal-ai': ['Refresh signals', 'Open analysis', 'Mute symbol'],
+    'signal-ai': ['Refresh signals', 'Open analysis', 'Filter contract'],
     'copy-trader': ['Review followers', 'Add demo account', 'Pause copying'],
-    speedbot: ['Run simulation', 'Set limits', 'Pause speedbot'],
-    automated: ['View activity', 'Pause workflow', 'Open logs'],
 };
 
 const WorkspaceTools = observer(() => {
@@ -174,6 +109,11 @@ const WorkspaceTools = observer(() => {
     const [isRunning, setIsRunning] = useState(false);
     const [showTradeConfirmation, setShowTradeConfirmation] = useState(false);
     const [tradeMode, setTradeMode] = useState<ContractMode>('DIGITMATCH');
+    const [volatility, setVolatility] = useState('All volatility');
+    const [bulkCount, setBulkCount] = useState(3);
+    const [marketType, setMarketType] = useState('Synthetic indices');
+    const [hedgeMode, setHedgeMode] = useState<ContractMode>('DIGITOVER');
+    const [hedgeBarrier, setHedgeBarrier] = useState(6);
     const {
         symbols,
         activeSymbol,
@@ -183,6 +123,8 @@ const WorkspaceTools = observer(() => {
         setStake,
         duration,
         setDuration,
+        selectedDigit,
+        setSelectedDigit,
         buyWithMode,
         isBuying,
         buyResult,
@@ -212,29 +154,24 @@ const WorkspaceTools = observer(() => {
     };
 
     const renderToolContent = () => {
-        if (tool.id === 'signal-ai' || tool.id === 'volt-ai') {
-            return <div className='workspace-tools__signals'>{signalRows.map(([market, signal, confidence, age]) => <div className='workspace-tools__signal-row' key={market}><span className='workspace-tools__signal-symbol'>{market}</span><span>{signal}</span><b>{confidence}</b><small>{age}</small></div>)}</div>;
-        }
-        if (tool.id === 'bulk-trader' || tool.id === 'copy-trader') {
-            return <div className='workspace-tools__account-list'>{['VRTC••••21', 'VRTC••••48', 'VRTC••••73'].map((account, index) => <div className='workspace-tools__account-row' key={account}><span className='workspace-tools__account-avatar'>{index + 1}</span><div><b>{account}</b><small>{index === 0 ? 'Primary demo account' : 'Connected demo account'}</small></div><strong>{index === 0 ? 'LEAD' : 'READY'}</strong></div>)}</div>;
+        if (tool.id === 'bulk-trader') {
+            return <div className='workspace-tools__special-form'><div className='workspace-tools__form-grid'><label>Volatility<select value={volatility} onChange={event => setVolatility(event.target.value)}><option>All volatility</option><option>Volatility 10</option><option>Volatility 25</option><option>Volatility 50</option><option>Volatility 75</option><option>Volatility 100</option></select></label><label>Market type<select value={marketType} onChange={event => setMarketType(event.target.value)}><option>Synthetic indices</option><option>Forex</option><option>Commodities</option></select></label><label>Number of bulk trades<input type='number' min='1' max='10' value={bulkCount} onChange={event => setBulkCount(Math.max(1, Math.min(10, Number(event.target.value) || 1)))} /></label><label>Stake per trade<input inputMode='decimal' min='0.35' step='0.01' value={stake} onChange={event => setStake(event.target.value)} /></label></div><div className='workspace-tools__batch-preview'><strong>{bulkCount} parallel trade threads</strong><span>{volatility} · {marketType} · {stake} stake each</span></div><button type='button' className='workspace-tools__form-action' onClick={() => setActiveAction(`Batch of ${bulkCount} trades ready for final review`)}>Review batch before execution →</button></div>;
         }
         if (tool.id === 'hedging') {
-            return <div className='workspace-tools__exposure'><div className='workspace-tools__exposure-ring'><strong>1.00</strong><small>balanced</small></div><div className='workspace-tools__exposure-bars'><div><span>Primary position</span><i style={{ width: '72%' }} /></div><div><span>Hedge position</span><i style={{ width: '68%' }} /></div><small>Estimated exposure after hedge: 4.2%</small></div></div>;
+            return <div className='workspace-tools__special-form'><div className='workspace-tools__form-grid'><label>Primary leg<select value={tradeMode} onChange={event => setTradeMode(event.target.value as ContractMode)}><option value='DIGITOVER'>Over</option><option value='DIGITUNDER'>Under</option><option value='DIGITEVEN'>Even</option><option value='DIGITODD'>Odd</option></select></label><label>Primary barrier<input type='number' min='0' max='9' value={selectedDigit} onChange={event => setSelectedDigit(Math.max(0, Math.min(9, Number(event.target.value) || 0)))} /></label><label>Hedge leg<select value={hedgeMode} onChange={event => setHedgeMode(event.target.value as ContractMode)}><option value='DIGITOVER'>Over</option><option value='DIGITUNDER'>Under</option><option value='DIGITEVEN'>Even</option><option value='DIGITODD'>Odd</option></select></label><label>Hedge barrier<input type='number' min='0' max='9' value={hedgeBarrier} onChange={event => setHedgeBarrier(Math.max(0, Math.min(9, Number(event.target.value) || 0)))} /></label></div><div className='workspace-tools__batch-preview'><strong>Two-leg hedge ready</strong><span>{tradeMode} {selectedDigit} + {hedgeMode} {hedgeBarrier}</span></div><button type='button' className='workspace-tools__form-action' onClick={() => setActiveAction('Hedge legs ready for final review')}>Review both legs →</button></div>;
         }
-        if (tool.id === 'auto-trading' || tool.id === 'automated' || tool.id === 'speedbot') {
-            return <div className='workspace-tools__automation'><div className='workspace-tools__automation-state'><span className='workspace-tools__automation-orb' /><div><b>{isRunning ? 'Workflow running' : 'Workflow paused'}</b><small>Guardrails and stop conditions are active</small></div><strong>{isRunning ? 'ON' : 'OFF'}</strong></div><div className='workspace-tools__automation-steps'><span>ENTRY <b>READY</b></span><span>RISK <b>LOCKED</b></span><span>EXIT <b>READY</b></span></div></div>;
+        if (tool.id === 'auto-trading') {
+            return <div className='workspace-tools__special-form'><div className='workspace-tools__form-grid'><label>Scan universe<select value={volatility} onChange={event => setVolatility(event.target.value)}><option>All volatility</option><option>Volatility 10–50</option><option>Volatility 75–100</option></select></label><label>Contract to find<select value={tradeMode} onChange={event => setTradeMode(event.target.value as ContractMode)}><option value='DIGITOVER'>Over</option><option value='DIGITUNDER'>Under</option><option value='DIGITMATCH'>Matches</option><option value='DIGITDIFF'>Differs</option></select></label></div><div className='workspace-tools__batch-preview'><strong>Scan → rank → review → run</strong><span>Find the best market first; no trade is sent during scanning.</span></div><button type='button' className='workspace-tools__form-action' onClick={() => { setIsRunning(true); setActiveAction('Scanning all selected volatilities'); }}>Run volatility scan →</button></div>;
         }
+        if (tool.id === 'volt-ai') {
+            return <div className='workspace-tools__signals'>{signalRows.map(([market, signal, confidence, age]) => <div className='workspace-tools__signal-row' key={market}><span className='workspace-tools__signal-symbol'>{market}</span><span>{signal}</span><b>{confidence}</b><small>{age}</small></div>)}</div>;
+        }
+        if (tool.id === 'copy-trader') {
+            return <div className='workspace-tools__account-list'>{['VRTC••••21', 'VRTC••••48', 'VRTC••••73'].map((account, index) => <div className='workspace-tools__account-row' key={account}><span className='workspace-tools__account-avatar'>{index + 1}</span><div><b>{account}</b><small>{index === 0 ? 'Primary demo account' : 'Connected demo account'}</small></div><strong>{index === 0 ? 'LEAD' : 'READY'}</strong></div>)}</div>;
+        }
+        if (tool.id === 'signal-ai') return <div className='workspace-tools__special-form'><div className='workspace-tools__form-grid'><label>Market<select value={activeSymbol} onChange={event => setActiveSymbol(event.target.value)}>{symbols.slice(0, 30).map(symbol => <option value={symbol.symbol} key={symbol.symbol}>{symbol.display_name || symbol.symbol}</option>)}</select></label><label>Contract signal<select value={tradeMode} onChange={event => setTradeMode(event.target.value as ContractMode)}><option value='DIGITOVER'>Over</option><option value='DIGITUNDER'>Under</option><option value='DIGITMATCH'>Matches</option><option value='DIGITDIFF'>Differs</option><option value='DIGITEVEN'>Even</option><option value='DIGITODD'>Odd</option></select></label></div><div className='workspace-tools__signals'>{signalRows.map(([market, signal, confidence, age]) => <div className='workspace-tools__signal-row' key={market}><span className='workspace-tools__signal-symbol'>{market}</span><span>{signal}</span><b>{confidence}</b><small>{age}</small></div>)}</div></div>;
         if (tool.id === 'trade-types') {
             return <div className='workspace-tools__contract-grid'>{[['Rise / Fall', 'CALL / PUT'], ['Over / Under', 'DIGITOVER'], ['Even / Odd', 'DIGITEVEN'], ['Matches / Differs', 'DIGITMATCH']].map(([title, code]) => <button type='button' key={code} onClick={() => setActiveAction(`${title} selected for review`)}><b>{title}</b><small>{code}</small></button>)}</div>;
-        }
-        if (tool.id === 'ai-bots' || tool.id === 'quick-bot') {
-            return <div className='workspace-tools__strategy-grid'>{[['Momentum Scout', 'Medium risk', '82%'], ['Digit Guard', 'Low risk', '76%'], ['Range Pilot', 'Medium risk', '69%']].map(([name, risk, score]) => <div className='workspace-tools__strategy-card' key={name}><span>{score}</span><b>{name}</b><small>{risk}</small><button type='button' onClick={() => runAction('Use template')}>Preview →</button></div>)}</div>;
-        }
-        if (tool.id === 'smart-recovery') {
-            return <div className='workspace-tools__guardrails'>{[['Maximum recovery steps', '2'], ['Daily loss limit', '5.00 USD'], ['Stake escalation', 'Locked']].map(([label, value]) => <div key={label}><span>{label}</span><b>{value}</b></div>)}<small>Recovery cannot increase exposure without a new review.</small></div>;
-        }
-        if (tool.id === 'christmas-gift') {
-            return <div className='workspace-tools__challenge'><div className='workspace-tools__challenge-progress'><span style={{ width: '62%' }} /></div><strong>62% complete</strong><p>Complete the live-analysis guide and review two demo strategies to unlock the next milestone.</p><button type='button' onClick={() => runAction('Continue challenge')}>Continue challenge →</button></div>;
         }
         return <div className='workspace-tools__workflow'>{['Choose market and contract', 'Set risk guardrails', 'Review simulated outcome'].map((step, index) => <div className={`workspace-tools__step ${index === 1 ? 'workspace-tools__step--current' : ''}`} key={step}><span>{String(index + 1).padStart(2, '0')}</span><div><b>{step}</b><small>{index === 1 ? 'Current workspace step' : 'Ready for review'}</small></div><i>{index < 1 ? '✓' : '•'}</i></div>)}</div>;
     };
