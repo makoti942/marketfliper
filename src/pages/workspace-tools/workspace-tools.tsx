@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { DBOT_TABS } from '@/constants/bot-contents';
 import { useStore } from '@/hooks/useStore';
+import { useManualTrade, ContractMode } from '@/pages/manual-trade/use-manual-trade';
 import './workspace-tools.scss';
 
 type ToolId =
@@ -168,9 +169,26 @@ const actionsByTool: Record<ToolId, string[]> = {
 };
 
 const WorkspaceTools = observer(() => {
-    const { dashboard } = useStore();
+    const { dashboard, client } = useStore();
     const [activeAction, setActiveAction] = useState('Ready');
     const [isRunning, setIsRunning] = useState(false);
+    const [showTradeConfirmation, setShowTradeConfirmation] = useState(false);
+    const [tradeMode, setTradeMode] = useState<ContractMode>('DIGITMATCH');
+    const {
+        symbols,
+        activeSymbol,
+        setActiveSymbol,
+        currentTick,
+        stake,
+        setStake,
+        duration,
+        setDuration,
+        buyWithMode,
+        isBuying,
+        buyResult,
+        buyError,
+        isConnected,
+    } = useManualTrade();
     const tool = TOOLS[dashboard.active_tab] || TOOLS[DBOT_TABS.VOLT_AI];
     const metrics = metricByTool[tool.id];
     const actions = actionsByTool[tool.id];
@@ -184,6 +202,10 @@ const WorkspaceTools = observer(() => {
     );
 
     const runAction = (action: string) => {
+        if (action === 'Open setup' || action === 'Use template' || action === 'Review batch') {
+            setActiveAction(`${action} ready for live review`);
+            return;
+        }
         setActiveAction(`${action} queued in demo mode`);
         if (action.toLowerCase().includes('pause') || action.toLowerCase().includes('stop')) setIsRunning(false);
         else if (action.toLowerCase().includes('run') || action.toLowerCase().includes('start') || action.toLowerCase().includes('scan')) setIsRunning(true);
@@ -229,8 +251,61 @@ const WorkspaceTools = observer(() => {
                     </aside>
                 </div>
 
+                <div className='workspace-tools__panel workspace-tools__panel--execution'>
+                    <div className='workspace-tools__panel-heading'>
+                        <div>
+                            <span className='workspace-tools__panel-kicker'>LIVE DERIV EXECUTION</span>
+                            <h2>Review and execute a contract</h2>
+                        </div>
+                        <span className={`workspace-tools__live-dot ${isConnected ? '' : 'workspace-tools__live-dot--offline'}`}>
+                            {isConnected ? 'WEBSOCKET CONNECTED' : 'CONNECTING'}
+                        </span>
+                    </div>
+                    <div className='workspace-tools__execution-grid'>
+                        <label>Market
+                            <select value={activeSymbol} onChange={event => setActiveSymbol(event.target.value)}>
+                                {(symbols.length ? symbols : [{ symbol: 'R_100', display_name: 'Volatility 100' }]).slice(0, 40).map(symbol => <option value={symbol.symbol} key={symbol.symbol}>{symbol.display_name || symbol.symbol}</option>)}
+                            </select>
+                        </label>
+                        <label>Contract
+                            <select value={tradeMode} onChange={event => setTradeMode(event.target.value as ContractMode)}>
+                                <option value='DIGITMATCH'>Matches</option>
+                                <option value='DIGITDIFF'>Differs</option>
+                                <option value='DIGITOVER'>Over</option>
+                                <option value='DIGITUNDER'>Under</option>
+                                <option value='DIGITEVEN'>Even</option>
+                                <option value='DIGITODD'>Odd</option>
+                            </select>
+                        </label>
+                        <label>Stake
+                            <input inputMode='decimal' min='0.35' step='0.01' value={stake} onChange={event => setStake(event.target.value)} />
+                        </label>
+                        <label>Duration (ticks)
+                            <input inputMode='numeric' min='1' step='1' value={duration} onChange={event => setDuration(Math.max(1, Number(event.target.value) || 1))} />
+                        </label>
+                        <div className='workspace-tools__quote'>
+                            <span>Latest quote</span>
+                            <strong>{currentTick?.quote ?? '—'}</strong>
+                            <small>{client?.loginid || 'No active account'} · {client?.loginid?.startsWith('VR') ? 'Demo' : 'Live account'}</small>
+                        </div>
+                        <button className='workspace-tools__execute' type='button' disabled={!isConnected || isBuying} onClick={() => setShowTradeConfirmation(true)}>
+                            {isBuying ? 'Sending…' : 'Review live trade'} <span>→</span>
+                        </button>
+                    </div>
+                    {(buyError || buyResult) && <div className={`workspace-tools__trade-result ${buyError ? 'workspace-tools__trade-result--error' : ''}`}>{buyError || `Contract ${buyResult?.contract_id} purchased successfully.`}</div>}
+                </div>
+
                 <div className='workspace-tools__footer'><span>Trader workspace / {tool.title}</span><span>All live orders require a final review</span><span>Risk controls enabled</span></div>
             </div>
+            {showTradeConfirmation && <div className='workspace-tools__modal-backdrop' role='presentation'>
+                <div className='workspace-tools__modal' role='dialog' aria-modal='true' aria-labelledby='live-trade-confirmation'>
+                    <span className='workspace-tools__panel-kicker'>FINAL REVIEW REQUIRED</span>
+                    <h2 id='live-trade-confirmation'>Confirm live Deriv order</h2>
+                    <p>This sends a real WebSocket buy request using the currently selected account.</p>
+                    <div className='workspace-tools__confirm-summary'><span>Account<strong>{client?.loginid || 'Unknown'}</strong></span><span>Market<strong>{activeSymbol}</strong></span><span>Contract<strong>{tradeMode}</strong></span><span>Stake<strong>{stake}</strong></span><span>Duration<strong>{duration} ticks</strong></span></div>
+                    <div className='workspace-tools__modal-actions'><button type='button' onClick={() => setShowTradeConfirmation(false)}>Cancel</button><button className='workspace-tools__execute' type='button' onClick={() => { setShowTradeConfirmation(false); void buyWithMode(tradeMode); }}>Confirm and buy</button></div>
+                </div>
+            </div>}
         </section>
     );
 });
