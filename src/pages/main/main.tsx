@@ -447,7 +447,9 @@ const AppWrapper = observer(() => {
                             <div
                                 label={<><span className='tab-icon-3d tab-icon-3d--bot-builder'><LabelPairedPuzzlePieceTwoCaptionBoldIcon height='18px' width='18px' fill='white' /></span><Localize i18n_default_text='Bot Builder' /></>}
                                 id='id-bot-builder'
-                            />
+                            >
+                                <div className='main__bot-builder-placeholder' aria-hidden='true' />
+                            </div>
                             <div
                                 label={<><span className='tab-icon-3d tab-icon-3d--charts'><LabelPairedChartLineCaptionRegularIcon height='18px' width='18px' fill='white' /></span><Localize i18n_default_text='Charts' /></>}
                                 id={is_chart_modal_visible || is_trading_view_modal_visible ? 'id-charts--disabled' : 'id-charts'}
